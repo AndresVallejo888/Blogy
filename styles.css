@@ -1,0 +1,152 @@
+/* ------------------ RESET Y ESTILO GLOBAL ------------------ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #fdf5f5;
+    color: #111827;
+  }
+  
+  /* ------------------ PÁGINAS CON FONDO ------------------ */
+  .index-page, .login-page, .signup-page, .home-page {
+    background-image: url('images/fondo-index.jpg'); /* <-- CAMBIA A TU IMAGEN */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* ------------------ PÁGINA DE INICIO (INDEX) ------------------ */
+  .intro-box {
+    text-align: center;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0); /* Transparente */
+    color: black;
+  }
+  
+  .logo-img {
+    width: 400px; /* Ajusta el valor según lo grande que la quieras */
+    height: auto; /* Mantiene la proporción original */
+  }
+  
+  
+  .titulo {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #00bfff;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitulo {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #222;
+    margin-bottom: 3rem;
+  }
+  
+  .botones-inicio .btn {
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 1rem 3rem;
+    margin: 0.5rem 0;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn.oscuro {
+    background-color: #111827;
+    color: white;
+  }
+  
+  .btn.oscuro:hover {
+    background-color: #1f2937;
+  }
+  
+  .separador {
+    font-weight: bold;
+    margin: 1.5rem 0;
+    color: #333;
+  }
+  
+  /* ------------------ TOP BAR Y DASHBOARD ------------------ */
+  .dashboard-page {
+    background-color: #fff6e9;
+    min-height: 100vh;
+    padding-top: 70px;
+  }
+  
+  .top-bar {
+    background: linear-gradient(to right, #fd3d8c, #ff928b);
+    color: white;
+    padding: 1rem 2rem;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+  }
+  
+  .logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #66d3fa;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .profile-icon {
+    background-color: #fef2f2;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    background-image: url('icono_usuario.svg');
+    background-size: 60%;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  
+  /* ------------------ LOGIN Y SIGNUP BOX ------------------ */
+  .auth-box {
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 400px;
+  }
+  
+  .auth-box input {
+    margin: 0.75rem 0;
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  .auth-box button {
+    background-color: #111111;
+    color: white;
+    padding: 0.75rem;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-top: 1rem;
+    cursor: pointer;
+  }
+  
+ 
