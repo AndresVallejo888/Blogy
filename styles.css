@@ -119,34 +119,229 @@
     background-position: center;
   }
   
-  /* ------------------ LOGIN Y SIGNUP BOX ------------------ */
-  .auth-box {
-    background-color: rgba(255, 255, 255, 0.85);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-    width: 90%;
-    max-width: 400px;
-  }
-  
-  .auth-box input {
-    margin: 0.75rem 0;
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-  }
-  
-  .auth-box button {
-    background-color: #111111;
-    color: white;
-    padding: 0.75rem;
-    width: 100%;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    margin-top: 1rem;
-    cursor: pointer;
-  }
-  
- 
+/* ------------------ LOGIN ------------------ */
+.login-page {
+  background-image: url('images/fondo-index.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-box-login {
+  background-color: #ffc0cb; /* Rosa */
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.auth-box-login input {
+  margin: 0.75rem 0;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  text-align: center; /* Alinea el texto a la izquierda dentro del input */
+}
+
+.auth-box-login button {
+  background-color: #000; /* Negro */
+  color: white;
+  padding: 0.75rem;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.auth-box-login button:hover {
+  background-color: #222;
+}
+
+.auth-box-login .separador {
+  text-align: center;
+  margin: 1rem 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.register-link a {
+  display: block;
+  background-color: #000; /* Negro */
+  color: white;
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.register-link a:hover {
+  background-color: #222;
+}
+
+/* ------------------ REGISTRO ------------------ */
+.register-page {
+  background-image: url('images/fondo-index.jpg'); /* Imagen de fondo */
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-box-register {
+  background-color: #87cefa; /* Celeste */
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.auth-box-register input {
+  margin: 0.75rem 0;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.auth-box-register button {
+  background-color: #000; /* Negro */
+  color: white;
+  padding: 0.75rem;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.auth-box-register button:hover {
+  background-color: #222;
+}
+
+.auth-box-register .separador {
+  text-align: center;
+  margin: 1rem 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.auth-box-register .login-link a {
+  display: block;
+  background-color: #000; /* Negro */
+  color: white;
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.auth-box-register .login-link a:hover {
+  background-color: #222;
+}
+
+.back-arrow {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 2rem;
+  color: black;
+  text-decoration: none;
+  font-weight: bold;
+  z-index: 1000;
+}
+
+.back-arrow:hover {
+  color: #333;
+}
+
+
+.user-icon {
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  filter: brightness(0);
+}
+
+.popup-header {
+  background-color: #e91e63;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  font-weight: bold;
+  position: relative;
+}
+
+.close-popup {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.logout-btn {
+  background-color: #f8bbd0;
+  color: #000;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-top: 1rem;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #e53935;
+  color: white;
+}
+
+.send-btn {
+  background-color: #e91e63;
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+}
+
+.send-btn:hover {
+  background-color: #c2185b;
+}
+.popup-admin-content .header-bar .close-popup {
+  position: absolute;
+  top: -1rem;  /* Subimos más la tachita */
+  right: 1rem;  /* Mantener la tachita en la esquina derecha */
+  transform: translateY(-50%);  /* Asegura que esté centrada verticalmente */
+  background: none;
+  border: none;
+  font-size: 3rem;  /* Tamaño de la tachita */
+  color: white;
+  cursor: pointer;
+}
+
