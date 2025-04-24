@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lenguajes de Programación</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f0e1;
+    }
+
+    .header {
+      background-image: url('images/fondo-index.jpg');
+      background-size: cover;
+      background-position: center;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .left-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .back-arrow {
+      font-size: 1.5rem;
+      text-decoration: none;
+      color: black;
+      font-weight: bold;
+    }
+
+    .logo {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .user-icon {
+      cursor: pointer;
+    }
+
+    .user-icon img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .main-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 3rem 2rem;
+    }
+
+    .section-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .section-info img {
+      width: 180px;
+      height: auto;
+    }
+
+    .section-info h1 {
+      font-size: 3rem;
+      color: #333;
+      margin: 0;
+    }
+
+    .create-blog-area {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+
+    .create-blog-area img {
+      width: 60px;
+      height: auto;
+    }
+
+    .create-blog-btn {
+      background-color: #e91e63;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .create-blog-btn:hover {
+      background-color: #c2185b;
+    }
+
+    .blog-list {
+      padding: 0 2rem;
+    }
+
+    .blog-post {
+      background-color: #fff;
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .blog-post h2 {
+      margin: 0 0 0.5rem;
+    }
+
+    .blog-post p {
+      margin: 0;
+    }
+
+    /* POPUP USUARIO */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .popup-content {
+      background-color: #f5f0e1;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      padding: 2rem;
+    }
+
+    .popup-user-header {
+      background-color: #e91e63;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-weight: bold;
+      position: relative;
+    }
+
+    .popup-user-header .close-popup {
+      position: absolute;
+      right: 1rem;
+      top: 0.5rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: white;
+      cursor: pointer;
+    }
+
+    .popup-user-body {
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .popup-user-body button {
+      background-color: #f8b7c3;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .popup-user-body button:hover {
+      background-color: red;
+    }
+
+    .popup-blog input,
+    .popup-blog textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .popup-blog button {
+      background-color: #e91e63;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="left-header">
+      <a href="home.html" class="back-arrow">&#8592;</a>
+      <div class="logo">BLOGY</div>
+    </div>
+    <div class="user-icon" onclick="mostrarUserPopup()">
+      <img src="images/user.png" alt="Usuario">
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="section-info">
+      <img src="images/lenguajes.png" alt="Lenguajes">
+      <h1>Lenguajes de Programación</h1>
+    </div>
+    <div class="create-blog-area">
+      <img src="images/escribir.png" alt="Escribir">
+      <button class="create-blog-btn" onclick="mostrarBlogPopup()">Crear Blog</button>
+    </div>
+  </main>
+
+  <div class="blog-list" id="blogList">
+    <!-- Aquí se cargan los blogs -->
+  </div>
+
+  <!-- POPUP USUARIO -->
+  <div class="popup" id="popupUser">
+    <div class="popup-content">
+      <div class="popup-user-header">
+        Hola Usuario
+        <button class="close-popup" onclick="cerrarPopup()">&times;</button>
+      </div>
+      <div class="popup-user-body">
+        <button onclick="location.href='index.html'">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP BLOG -->
+  <div class="popup" id="popupBlog">
+    <div class="popup-content popup-blog">
+      <h2>Nuevo Blog</h2>
+      <input type="text" id="blogTitulo" placeholder="Título del blog">
+      <textarea id="blogContenido" rows="5" placeholder="Contenido del blog"></textarea>
+      <button onclick="subirBlog()">Subir Blog</button>
+    </div>
+  </div>
+
+  <script>
+    function mostrarUserPopup() {
+      document.getElementById('popupUser').style.display = 'flex';
+    }
+
+    function mostrarBlogPopup() {
+      document.getElementById('popupBlog').style.display = 'flex';
+    }
+
+    function cerrarPopup() {
+      document.querySelectorAll('.popup').forEach(p => p.style.display = 'none');
+    }
+
+    function subirBlog() {
+      const titulo = document.getElementById('blogTitulo').value;
+      const contenido = document.getElementById('blogContenido').value;
+
+      if (titulo && contenido) {
+        const blogList = document.getElementById('blogList');
+        const post = document.createElement('div');
+        post.className = 'blog-post';
+        post.innerHTML = `<h2>${titulo}</h2><p>${contenido}</p>`;
+        blogList.prepend(post);
+        cerrarPopup();
+        document.getElementById('blogTitulo').value = '';
+        document.getElementById('blogContenido').value = '';
+      } else {
+        alert('Completa ambos campos');
+      }
+    }
+  </script>
+
+</body>
+</html>
