@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar / Eliminar</title>
+  <link rel="stylesheet" href="editar-eliminar.css" />
+  <style>
+    .user-menu-container {
+      position: relative;
+    }
+
+    .user-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 30px;
+      background: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      text-align: left;
+      min-width: 200px;
+      z-index: 10;
+    }
+
+    .user-menu.show {
+      display: block;
+    }
+
+    .user-menu p {
+      margin: 5px 0;
+    }
+
+    .user-menu button {
+      background: #e05c7d;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <a href="dashboard-admin.html" class="back-arrow">←</a>
+    <img src="images/logo.png" alt="Logo" class="logo" />
+    <div class="user-menu-container">
+      <div class="user-icon" onclick="toggleMenu()">👤</div>
+      <div id="userMenu" class="user-menu">
+        <p class="nombre">Andres Vallejo</p>
+        <p class="correo">correo@correo.com</p>
+        <button onclick="cerrarSesion()">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="editar-container">
+    <h1>Editar / Eliminar</h1>
+    <div class="busqueda">
+      <input type="text" placeholder="Título" />
+      <button>🔍</button>
+    </div>
+
+    <ul class="lista-blogs">
+      <li>
+        <div class="info">
+          <strong>Comandos Básicos de JavaScript</strong><br />Andrés Vallejo
+        </div>
+        <div class="acciones">
+          <button class="editar">Editar</button>
+          <button class="eliminar">Eliminar</button>
+        </div>
+      </li>
+      <li>
+        <div class="info">
+          <strong>Tips Para Programar en Python</strong><br />Gonzalo Cortés
+        </div>
+        <div class="acciones">
+          <button class="editar">Editar</button>
+          <button class="eliminar">Eliminar</button>
+        </div>
+      </li>
+    </ul>
+  </main>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById("userMenu");
+      menu.classList.toggle("show");
+    }
+
+    function cerrarSesion() {
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

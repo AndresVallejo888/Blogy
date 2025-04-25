@@ -1,0 +1,96 @@
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: #fffaf6;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: linear-gradient(to right, #ff7eb3, #ff758c);
+}
+
+.back-arrow {
+  margin-right: auto;
+  font-size: 24px;
+  text-decoration: none;
+  color: black;
+}
+
+.logo {
+  width: 100px;
+}
+
+.user-icon {
+  margin-left: auto;
+  font-size: 24px;
+}
+
+.reportes-container {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #e0f8dc;
+  border: 1px solid #a4d7a7;
+  border-radius: 10px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.filtros {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.filtros select,
+.filtros input {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.busqueda {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lista-reportes {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+  background: #e9f9f6;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.lista-reportes li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #d4e9d2;
+}
+
+.inicial {
+  font-weight: bold;
+  background: #cce5cc;
+  border-radius: 50%;
+  padding: 5px 10px;
+  margin-right: 10px;
+}
+
+.delete {
+  color: #d22;
+  cursor: pointer;
+  margin-left: 10px;
+}
