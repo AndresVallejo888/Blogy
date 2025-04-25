@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Administrador - Blogy</title>
+    <link rel="stylesheet" href="dashboard-admin.css">
+    <style>
+        .user-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+        }
+        .user-toggle img {
+            width: 32px;
+        }
+        .user-panel {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: #ffffffcc;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            display: none;
+            min-width: 220px;
+            text-align: left;
+        }
+        .user-panel strong {
+            display: block;
+        }
+        .logout-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #ef476f;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+    <script>
+        function toggleUserPanel() {
+            const panel = document.getElementById('userPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function logout() {
+            localStorage.clear(); // limpia datos en caso de que uses localStorage
+            window.location.href = 'index.html';
+            setTimeout(() => {
+                window.location.reload(); // fuerza recarga
+            }, 100);
+        }
+    </script>
+</head>
+<body>
+
+    <div class="header">BLOGY - Administrador</div>
+    
+    <!-- Icono de usuario -->
+    <div class="user-toggle" onclick="toggleUserPanel()">
+        <img src="images/user.png" alt="Usuario">
+    </div>
+
+    <!-- Panel de usuario -->
+    <div id="userPanel" class="user-panel">
+        <strong>Andres Vallejo</strong>
+        <small>correo@correo.com</small>
+        <a href="#" class="logout-btn" onclick="logout()">Cerrar Sesión</a>
+    </div>
+
+    <h1>¿Qué desea hacer?</h1>
+
+    <div class="card-container">
+        <div class="card">
+            <img src="images/editar.png" alt="Editar/Eliminar">
+            <h2>Editar / Eliminar</h2>
+            <a href="editar-eliminar.html">Haz click aquí</a>
+        </div>
+
+        <div class="card">
+            <img src="images/solicitudes.png" alt="Solicitudes">
+            <h2>Solicitudes</h2>
+            <a href="solicitudes.html">Haz click aquí</a>
+        </div>
+
+        <div class="card">
+            <img src="images/reportes.png" alt="Ver Reportes">
+            <h2>Ver Reportes</h2>
+            <a href="reportes.html">Haz click aquí</a>
+        </div>
+    </div>
+
+</body>
+</html>

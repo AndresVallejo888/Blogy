@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ver Reportes</title>
+  <link rel="stylesheet" href="reportes.css" />
+  <style>
+    .user-menu-container {
+      position: relative;
+    }
+
+    .user-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 30px;
+      background: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      text-align: left;
+      min-width: 200px;
+      z-index: 10;
+    }
+
+    .user-menu.show {
+      display: block;
+    }
+
+    .user-menu p {
+      margin: 5px 0;
+    }
+
+    .user-menu button {
+      background: #e05c7d;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <a href="dashboard-admin.html" class="back-arrow">←</a>
+    <img src="images/logo.png" alt="Logo" class="logo" />
+    <div class="user-menu-container">
+      <div class="user-icon" onclick="toggleMenu()">👤</div>
+      <div id="userMenu" class="user-menu">
+        <p class="nombre">Andres Vallejo</p>
+        <p class="correo">correo@correo.com</p>
+        <button onclick="cerrarSesion()">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="reportes-container">
+    <h1>Ver Reportes</h1>
+    <div class="filtros">
+      <label for="seccion">Sección</label>
+      <select id="seccion">
+        <option>Ciberseguridad</option>
+        <option>Desarrollo Web y Apps</option>
+        <option>Lenguajes de Programación</option>
+      </select>
+      <div class="busqueda">
+        <input type="text" placeholder="Usuario" />
+        <button>🔍</button>
+      </div>
+    </div>
+
+    <ul class="lista-reportes">
+      <li>
+        <span class="inicial">A</span>
+        Andrés Vallejo <strong>creó</strong> un blog: “¿Qué tan segura es tu contraseña?”<br />
+        <small><strong>2 de Marzo del 2025</strong></small>
+        <span class="delete">✖</span>
+      </li>
+      <li>
+        <span class="inicial">A</span>
+        Damian Guerrero <strong>creó</strong> un blog: “Cómo evitar ataques cibernéticos”<br />
+        <small><strong>2 de Marzo del 2025</strong></small>
+        <span class="delete">✖</span>
+      </li>
+    </ul>
+  </main>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById("userMenu");
+      menu.classList.toggle("show");
+    }
+
+    function cerrarSesion() {
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
