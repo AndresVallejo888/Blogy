@@ -33,7 +33,10 @@ router.post('/registro', async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM Usuarios WHERE Correo_Usuario = ?', [email]);
     
     if (rows.length > 0) {
-      return res.status(400).send('El correo electrónico ya está registrado');
+      return res.status(400).json({ 
+        success: false, 
+        message: 'El correo electrónico ya está registrado' 
+      });
     }
 
     // Hash de la contraseña
@@ -45,10 +48,13 @@ router.post('/registro', async (req, res) => {
       [nombre, apellido, email, hashedPassword]
     );
 
-    res.redirect('/login.html');
+    res.json({ success: true });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error en el servidor');
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error en el servidor' 
+    });
   }
 });
 
@@ -61,7 +67,10 @@ router.post('/login', async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM Usuarios WHERE Correo_Usuario = ?', [email]);
     
     if (rows.length === 0) {
-      return res.status(400).send('Credenciales incorrectas');
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Credenciales incorrectas' 
+      });
     }
 
     const user = rows[0];
@@ -70,7 +79,10 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.Password_Usuario);
     
     if (!isMatch) {
-      return res.status(400).send('Credenciales incorrectas');
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Credenciales incorrectas' 
+      });
     }
 
     // Crear sesión
@@ -82,10 +94,13 @@ router.post('/login', async (req, res) => {
       isAdmin: user.Es_Admin
     };
 
-    res.redirect('/home.html');
+    res.json({ success: true });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error en el servidor');
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error en el servidor' 
+    });
   }
 });
 

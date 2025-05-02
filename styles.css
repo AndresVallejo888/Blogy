@@ -345,3 +345,23 @@
   cursor: pointer;
 }
 
+.error-popup {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #e25d23;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 5px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; top: 0; }
+  10% { opacity: 1; top: 20px; }
+  90% { opacity: 1; top: 20px; }
+  100% { opacity: 0; top: 0; }
+}

@@ -5,12 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Blogy - Registrarse</title>
   <link rel="stylesheet" href="styles.css"/>
+  <script>
+    function showErrorPopup(message) {
+      const popup = document.createElement('div');
+      popup.className = 'error-popup';
+      popup.textContent = message;
+      document.body.appendChild(popup);
+      
+      setTimeout(() => {
+        popup.remove();
+      }, 3000);
+    }
+    
+    async function handleRegister(event) {
+      event.preventDefault();
+      
+      const formData = new FormData(event.target);
+      const response = await fetch('/registro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(formData)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        window.location.href = '/login.html';
+      } else {
+        showErrorPopup(result.message); // Mostrar alerta con el mensaje de error
+      }
+    }
+    
+  </script>
 </head>
 <body class="register-page">
  <a href="index.html" class="back-arrow">←</a>
   <main class="auth-box-register">
     <h2 class="login-title">Regístrate</h2>
-    <form class="register-form" action="/registro" method="POST">
+    <form class="register-form" onsubmit="handleRegister(event)">
       <div class="form-group">
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" required />
