@@ -229,7 +229,6 @@
       background-color: #c2185b;
     }
 
-    /* USER POPUP */
     .popup-user-content {
       background-color: #f5f0e1;
       border-radius: 12px;
@@ -334,16 +333,48 @@
   <div class="popup" id="popupUser">
     <div class="popup-user-content">
       <div class="popup-user-header">
-        Hola Usuario
+        Hola <span id="nombreUsuario"></span>
         <button class="close-popup" onclick="cerrarPopup()">&times;</button>
       </div>
       <div class="popup-user-body">
-        <button onclick="location.href='index.html'">Cerrar sesión</button>
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
     </div>
   </div>
 
   <script>
+    let usuarioActual = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await cargarUsuario();
+    });
+    
+    async function cargarUsuario() {
+      try {
+        const response = await fetch('/api/usuario-actual');
+        if (response.ok) {
+          usuarioActual = await response.json();
+          // Actualizar el nombre en el popup
+          document.getElementById('nombreUsuario').textContent = 
+            `${usuarioActual.nombre} ${usuarioActual.apellido}`;
+        } else {
+          window.location.href = '/login.html';
+        }
+      } catch (error) {
+        console.error('Error al cargar usuario:', error);
+      }
+    }
+
+    async function cerrarSesion() {
+      try {
+        const response = await fetch('/logout');
+        if (response.ok) {
+          window.location.href = '/login.html';
+        }
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+      }
+    }
     function mostrarPopup(id) {
       document.getElementById(id).style.display = 'flex';
     }
