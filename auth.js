@@ -120,23 +120,38 @@ router.get('/api/usuario-actual', (req, res) => {
 
 // Obtener blogs por tipo
 router.get('/api/blogs', async (req, res) => {
-  const { tipo } = req.query;
-  
-  try {
-    const [blogs] = await pool.query(`
-      SELECT b.*, u.Nombre_Usuario, u.Apellido_Usuario 
-      FROM Blog b
-      JOIN Usuarios u ON b.ID_Usuario = u.ID_Usuario
-      WHERE b.ID_TipoBlog = ?
-      ORDER BY b.Fecha_Creacion DESC
-    `, [tipo]);
+    const { tipo, search } = req.query;
     
-    res.json(blogs);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al obtener blogs' });
-  }
-});
+    try {
+      let query = `
+        SELECT b.*, u.Nombre_Usuario, u.Apellido_Usuario 
+        FROM Blog b
+        JOIN Usuarios u ON b.ID_Usuario = u.ID_Usuario
+        WHERE 1=1
+      `;
+      
+      const params = [];
+      
+      if (tipo) {
+        query += ' AND b.ID_TipoBlog = ?';
+        params.push(tipo);
+      }
+      
+      if (search) {
+        query += ' AND (b.Titulo LIKE ? OR b.Contenido_Blog LIKE ?)';
+        params.push(`%${search}%`, `%${search}%`);
+      }
+      
+      query += ' ORDER BY b.Fecha_Creacion DESC';
+      
+      const [blogs] = await pool.query(query, params);
+      res.json(blogs);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener blogs' });
+    }
+  });
+
 
 // Crear nuevo blog
 router.post('/api/blogs', async (req, res) => {

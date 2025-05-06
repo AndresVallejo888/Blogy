@@ -213,6 +213,55 @@
       border-radius: 8px;
       cursor: pointer;
     }
+    .search-container {
+      display: flex;
+      margin: 1rem 2rem;
+      max-width: 800px;
+      gap: 5px;
+    }
+    
+    .search-input {
+      flex: 1;
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    .search-btn {
+      padding: 0 1.5rem;
+      background-color: #e91e63;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .clear-btn {
+      padding: 0 1.5rem;
+      background-color: #f5f0e1;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .search-btn:hover {
+      background-color: #c2185b;
+    }
+    
+    .clear-btn:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -237,6 +286,12 @@
       <button class="create-blog-btn" onclick="mostrarBlogPopup()">Crear Blog</button>
     </div>
   </main>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" class="search-input" placeholder="Buscar blogs por título o contenido...">
+    <button class="search-btn" onclick="filtrarBlogs()">Buscar</button>
+    <button class="clear-btn" onclick="limpiarBusqueda()">Limpiar</button>
+  </div>
 
   <div class="blog-list" id="blogList">
     <!-- Aquí se cargan los blogs dinámicamente -->
@@ -269,6 +324,7 @@
     // Constantes
     const TIPO_BLOG = 1; // ID de Lenguajes de Programación en tu BD
     let usuarioActual = null;
+    let todosLosBlogs = [];
 
     // Cargar datos al iniciar
     document.addEventListener('DOMContentLoaded', async () => {
@@ -339,6 +395,31 @@
         `;
         blogList.appendChild(post);
       });
+    }
+
+    async function filtrarBlogs() {
+      const searchText = document.getElementById('searchInput').value.trim();
+      
+      if (!searchText) {
+        await cargarBlogs();
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/blogs?tipo=${TIPO_BLOG}&search=${encodeURIComponent(searchText)}`);
+        if (response.ok) {
+          const blogs = await response.json();
+          mostrarBlogs(blogs);
+        }
+      } catch (error) {
+        console.error('Error al buscar blogs:', error);
+      }
+    }
+
+    // Función para limpiar la búsqueda
+    async function limpiarBusqueda() {
+      document.getElementById('searchInput').value = '';
+      await cargarBlogs();
     }
 
     // Función para crear un nuevo blog
