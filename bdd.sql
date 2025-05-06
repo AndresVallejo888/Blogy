@@ -37,17 +37,6 @@ create table Blog (
     CONSTRAINT fk_blog_tipo FOREIGN KEY (ID_TipoBlog) REFERENCES TipoBlog(ID_TipoBlog),
     CONSTRAINT fk_blog_usuario FOREIGN KEY (ID_Usuario) REFERENCES Usuarios(ID_Usuario)
 );
-create table Blog (
-	ID_Blog int auto_increment,
-    ID_TipoBlog int not null,
-    ID_Usuario int not null,
-    Fecha_Creacion datetime not null,
-    Fecha_Update datetime,
-    Contenido_Blog text not null,
-    PRIMARY KEY (ID_Blog),
-    CONSTRAINT fk_blog_tipo FOREIGN KEY (ID_TipoBlog) REFERENCES TipoBlog(ID_TipoBlog),
-    CONSTRAINT fk_blog_usuario FOREIGN KEY (ID_Usuario) REFERENCES Usuarios(ID_Usuario)
-);
 
 ALTER TABLE Blog ADD COLUMN Titulo VARCHAR(255) AFTER ID_Blog;
 select * from blog;
