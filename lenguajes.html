@@ -119,6 +119,21 @@
       margin: 0;
     }
 
+    .blog-meta {
+      color: #666;
+      font-size: 0.9rem;
+      margin: 0.5rem 0;
+    }
+
+    .blog-author {
+      font-weight: bold;
+      color: #e91e63;
+    }
+
+    .blog-date {
+      font-style: italic;
+    }
+
     /* POPUP USUARIO */
     .popup {
       display: none;
@@ -224,7 +239,7 @@
   </main>
 
   <div class="blog-list" id="blogList">
-    <!-- Aquí se cargan los blogs -->
+    <!-- Aquí se cargan los blogs dinámicamente -->
   </div>
 
   <!-- POPUP USUARIO -->
@@ -235,7 +250,7 @@
         <button class="close-popup" onclick="cerrarPopup()">&times;</button>
       </div>
       <div class="popup-user-body">
-        <button onclick="location.href='index.html'">Cerrar sesión</button>
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
     </div>
   </div>
@@ -244,13 +259,128 @@
   <div class="popup" id="popupBlog">
     <div class="popup-content popup-blog">
       <h2>Nuevo Blog</h2>
-      <input type="text" id="blogTitulo" placeholder="Título del blog">
-      <textarea id="blogContenido" rows="5" placeholder="Contenido del blog"></textarea>
-      <button onclick="subirBlog()">Subir Blog</button>
+      <input type="text" id="blogTitulo" placeholder="Título del blog" required>
+      <textarea id="blogContenido" rows="5" placeholder="Contenido del blog" required></textarea>
+      <button onclick="crearBlog()">Subir Blog</button>
     </div>
   </div>
 
   <script>
+    // Constantes
+    const TIPO_BLOG = 1; // ID de Lenguajes de Programación en tu BD
+    let usuarioActual = null;
+
+    // Cargar datos al iniciar
+    document.addEventListener('DOMContentLoaded', async () => {
+      await cargarUsuario();
+      await cargarBlogs();
+    });
+
+    // Función para cargar los datos del usuario
+    async function cargarUsuario() {
+      try {
+        const response = await fetch('/api/usuario-actual');
+        if (response.ok) {
+          usuarioActual = await response.json();
+          document.querySelector('.popup-user-header').textContent = 
+            `Hola ${usuarioActual.nombre} ${usuarioActual.apellido}`;
+        } else {
+          window.location.href = '/login.html';
+        }
+      } catch (error) {
+        console.error('Error al cargar usuario:', error);
+      }
+    }
+
+    // Función para cargar los blogs desde la BD
+    async function cargarBlogs() {
+      try {
+        const response = await fetch(`/api/blogs?tipo=${TIPO_BLOG}`);
+        if (response.ok) {
+          const blogs = await response.json();
+          mostrarBlogs(blogs);
+        }
+      } catch (error) {
+        console.error('Error al cargar blogs:', error);
+      }
+    }
+
+    // Función para mostrar los blogs en la página
+    function mostrarBlogs(blogs) {
+      const blogList = document.getElementById('blogList');
+      blogList.innerHTML = '';
+
+      if (blogs.length === 0) {
+        blogList.innerHTML = '<p>No hay blogs aún. ¡Sé el primero en publicar!</p>';
+        return;
+      }
+
+      blogs.forEach(blog => {
+        const post = document.createElement('div');
+        post.className = 'blog-post';
+        
+        // Formatear fecha
+        const fechaCreacion = new Date(blog.Fecha_Creacion);
+        const fechaFormateada = fechaCreacion.toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        post.innerHTML = `
+          <h2>${blog.Titulo || 'Blog sin título'}</h2>
+          <div class="blog-meta">
+            Publicado por <span class="blog-author">${blog.Nombre_Usuario} ${blog.Apellido_Usuario}</span>
+            el <span class="blog-date">${fechaFormateada}</span>
+          </div>
+          <p>${blog.Contenido_Blog}</p>
+        `;
+        blogList.appendChild(post);
+      });
+    }
+
+    // Función para crear un nuevo blog
+    async function crearBlog() {
+      const titulo = document.getElementById('blogTitulo').value.trim();
+      const contenido = document.getElementById('blogContenido').value.trim();
+
+      if (!titulo || !contenido) {
+        alert('Por favor completa todos los campos');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/blogs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            titulo,
+            contenido,
+            tipoBlog: TIPO_BLOG
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          cerrarPopup();
+          document.getElementById('blogTitulo').value = '';
+          document.getElementById('blogContenido').value = '';
+          await cargarBlogs(); // Recargar la lista de blogs
+        } else {
+          alert(result.message || 'Error al crear el blog');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al conectar con el servidor');
+      }
+    }
+
+    // Funciones para mostrar/cerrar popups
     function mostrarUserPopup() {
       document.getElementById('popupUser').style.display = 'flex';
     }
@@ -263,21 +393,15 @@
       document.querySelectorAll('.popup').forEach(p => p.style.display = 'none');
     }
 
-    function subirBlog() {
-      const titulo = document.getElementById('blogTitulo').value;
-      const contenido = document.getElementById('blogContenido').value;
-
-      if (titulo && contenido) {
-        const blogList = document.getElementById('blogList');
-        const post = document.createElement('div');
-        post.className = 'blog-post';
-        post.innerHTML = `<h2>${titulo}</h2><p>${contenido}</p>`;
-        blogList.prepend(post);
-        cerrarPopup();
-        document.getElementById('blogTitulo').value = '';
-        document.getElementById('blogContenido').value = '';
-      } else {
-        alert('Completa ambos campos');
+    // Función para cerrar sesión
+    async function cerrarSesion() {
+      try {
+        const response = await fetch('/logout');
+        if (response.ok) {
+          window.location.href = '/login.html';
+        }
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
       }
     }
   </script>

@@ -110,4 +110,57 @@ router.get('/logout', (req, res) => {
   res.redirect('/login.html');
 });
 
+// Obtener usuario actual
+router.get('/api/usuario-actual', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: 'No autenticado' });
+  }
+  res.json(req.session.user);
+});
+
+// Obtener blogs por tipo
+router.get('/api/blogs', async (req, res) => {
+  const { tipo } = req.query;
+  
+  try {
+    const [blogs] = await pool.query(`
+      SELECT b.*, u.Nombre_Usuario, u.Apellido_Usuario 
+      FROM Blog b
+      JOIN Usuarios u ON b.ID_Usuario = u.ID_Usuario
+      WHERE b.ID_TipoBlog = ?
+      ORDER BY b.Fecha_Creacion DESC
+    `, [tipo]);
+    
+    res.json(blogs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener blogs' });
+  }
+});
+
+// Crear nuevo blog
+router.post('/api/blogs', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: 'No autenticado' });
+  }
+
+  const { titulo, contenido, tipoBlog } = req.body;
+
+  if (!titulo || !contenido || !tipoBlog) {
+    return res.status(400).json({ message: 'Datos incompletos' });
+  }
+
+  try {
+    await pool.query(
+      'INSERT INTO Blog (ID_TipoBlog, ID_Usuario, Titulo, Fecha_Creacion, Contenido_Blog) VALUES (?, ?, ?, NOW(), ?)',
+      [tipoBlog, req.session.user.id, titulo, contenido]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al crear blog' });
+  }
+});
+
 module.exports = router;
