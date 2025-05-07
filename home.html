@@ -277,6 +277,38 @@
     .popup-user-body button:hover {
       background-color: red;
     }
+    .terms-container {
+      scrollbar-width: thin;
+      scrollbar-color: #e91e63 #f5f0e1;
+    }
+
+    .terms-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .terms-container::-webkit-scrollbar-track {
+      background: #f5f0e1;
+      border-radius: 4px;
+    }
+
+    .terms-container::-webkit-scrollbar-thumb {
+      background-color: #e91e63;
+      border-radius: 4px;
+    }
+
+    .terms-container h3, .terms-container h4 {
+      color: #e91e63;
+      margin-top: 1rem;
+    }
+
+    .terms-container p, .terms-container ul {
+      margin-bottom: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .terms-container ul {
+      padding-left: 1.5rem;
+    }
   </style>
 </head>
 <body>
@@ -314,17 +346,59 @@
         <button class="close-popup" onclick="cerrarPopup()">&times;</button>
       </div>
       <div class="body">
+        <div id="adminStatusMessage" style="margin-bottom: 1rem; color: #e91e63; font-weight: bold; display: none;"></div>
+        
+        <div class="terms-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; background: white; border-radius: 8px;">
+          <h3>Políticas de Privacidad</h3>
+          <p><strong>Última actualización: 01/01/2025</strong></p>
+          
+          <h4>1. Información que recopilamos</h4>
+          <p>Recopilamos información que nos proporcionas directamente, como tu nombre, dirección de correo electrónico, número de teléfono y cualquier otra información que elijas proporcionar.</p>
+          
+          <h4>2. Uso de la información</h4>
+          <p>Utilizamos la información que recopilamos para:</p>
+          <ul>
+            <li>Proveer, operar y mantener nuestro servicio</li>
+            <li>Mejorar, personalizar y expandir nuestro servicio</li>
+            <li>Comprender y analizar cómo utilizas nuestro servicio</li>
+            <li>Desarrollar nuevos productos, servicios, características y funcionalidades</li>
+            <li>Comunicarnos contigo, ya sea directamente o a través de nuestros socios</li>
+          </ul>
+          
+          <h4>3. Compartir información</h4>
+          <p>No compartimos información personal con terceros excepto en los siguientes casos:</p>
+          <ul>
+            <li>Con proveedores de servicios que nos ayudan a operar nuestro servicio</li>
+            <li>Para cumplir con requisitos legales</li>
+            <li>Para proteger los derechos y la seguridad de BLOGY y nuestros usuarios</li>
+          </ul>
+          
+          <h4>4. Seguridad de los datos</h4>
+          <p>Implementamos medidas de seguridad para proteger tu información personal, pero ninguna transmisión por Internet o método de almacenamiento electrónico es 100% seguro.</p>
+          
+          <h4>5. Tus derechos</h4>
+          <p>Tienes derecho a acceder, corregir o eliminar tu información personal. Puedes hacerlo a través de tu cuenta o contactándonos directamente.</p>
+        </div>
+        
         <div class="toggle-group">
           <span>Acepto la política de privacidad</span>
-          <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+          <label class="switch">
+            <input type="checkbox" id="politicasCheck">
+            <span class="slider"></span>
+          </label>
         </div>
+        
         <div class="toggle-group">
-          <span>Cuidaré mi integridad y la de los demás</span>
-          <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+          <span>Acepto mantener la integridad de la comunidad</span>
+          <label class="switch">
+            <input type="checkbox" id="integridadCheck">
+            <span class="slider"></span>
+          </label>
         </div>
+        
         <p>Teléfono (se te contactará para completar el proceso)</p>
-        <input type="tel" placeholder="Tu número de celular">
-        <button>Enviar</button>
+        <input type="tel" id="telefonoAdmin" placeholder="Tu número de celular">
+        <button id="enviarSolicitudBtn">Enviar Solicitud</button>
       </div>
     </div>
   </div>
@@ -347,7 +421,12 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       await cargarUsuario();
+      await verificarEstadoAdmin();
+      
+      // Configurar evento del botón de enviar solicitud
+      document.getElementById('enviarSolicitudBtn').addEventListener('click', enviarSolicitudAdmin);
     });
+
     
     async function cargarUsuario() {
       try {
@@ -375,6 +454,101 @@
         console.error('Error al cerrar sesión:', error);
       }
     }
+
+    async function verificarEstadoAdmin() {
+      try {
+        const response = await fetch('/api/admin-request-status');
+        if (response.ok) {
+          const data = await response.json();
+          const adminBtn = document.querySelector('.admin-btn');
+          const statusMessage = document.getElementById('adminStatusMessage');
+          
+          if (data.isAdmin) {
+            adminBtn.textContent = 'Eres administrador';
+            adminBtn.style.backgroundColor = '#4CAF50';
+            adminBtn.onclick = null;
+          } else if (data.hasRequested) {
+            adminBtn.textContent = 'Solicitud enviada';
+            adminBtn.style.backgroundColor = '#FF9800';
+            adminBtn.onclick = null;
+            statusMessage.textContent = 'Tu solicitud está en revisión. Te contactaremos pronto.';
+            statusMessage.style.display = 'block';
+          }
+        }
+      } catch (error) {
+        console.error('Error al verificar estado admin:', error);
+      }
+    }
+
+    async function enviarSolicitudAdmin() {
+      const politicas = document.getElementById('politicasCheck').checked;
+      const integridad = document.getElementById('integridadCheck').checked;
+      const telefono = document.getElementById('telefonoAdmin').value.trim();
+      const statusMessage = document.getElementById('adminStatusMessage');
+      
+      // Resetear mensaje
+      statusMessage.style.display = 'none';
+      
+      // Validaciones básicas
+      if (!telefono) {
+        mostrarError('Por favor ingresa tu número de teléfono');
+        return;
+      }
+
+      if (!politicas || !integridad) {
+        mostrarError('Debes aceptar ambas condiciones para continuar');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/solicitar-admin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include', // Importante para sesiones
+          body: JSON.stringify({
+            telefono,
+            aceptoPoliticas: politicas,
+            aceptoIntegridad: integridad
+          })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || 'Error en la solicitud');
+        }
+        
+        mostrarExito('Solicitud enviada con éxito. Te contactaremos pronto.');
+        
+        const adminBtn = document.querySelector('.admin-btn');
+        adminBtn.textContent = 'Solicitud enviada';
+        adminBtn.style.backgroundColor = '#FF9800';
+        adminBtn.onclick = null;
+        
+        setTimeout(cerrarPopup, 2000);
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarError(error.message || 'Error al conectar con el servidor');
+      }
+    }
+
+    function mostrarError(mensaje) {
+      const statusMessage = document.getElementById('adminStatusMessage');
+      statusMessage.textContent = mensaje;
+      statusMessage.style.color = '#e91e63';
+      statusMessage.style.display = 'block';
+    }
+    function mostrarExito(mensaje) {
+      const statusMessage = document.getElementById('adminStatusMessage');
+      statusMessage.textContent = mensaje;
+      statusMessage.style.color = '#4CAF50';
+      statusMessage.style.display = 'block';
+    }
+
+
     function mostrarPopup(id) {
       document.getElementById(id).style.display = 'flex';
     }
