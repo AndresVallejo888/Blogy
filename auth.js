@@ -228,3 +228,72 @@ router.post('/api/comentarios', async (req, res) => {
     res.status(500).json({ message: 'Error al crear comentario' });
   }
 });
+// Solicitar ser administrador
+router.post('/api/solicitar-admin', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'No autenticado' });
+  }
+
+  const { telefono, aceptoPoliticas, aceptoIntegridad } = req.body;
+
+  // Validaciones mejoradas
+  if (typeof aceptoPoliticas !== 'boolean' || !aceptoPoliticas || 
+      typeof aceptoIntegridad !== 'boolean' || !aceptoIntegridad) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Debes aceptar todos los términos' 
+    });
+  }
+
+  if (!telefono || !/^[\d\s+-]{8,15}$/.test(telefono)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Por favor ingresa un número de teléfono válido' 
+    });
+  }
+
+  try {
+    const [result] = await pool.query(
+      'UPDATE Usuarios SET telefono = ?, Admin_Request = TRUE WHERE ID_Usuario = ?',
+      [telefono, req.session.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      throw new Error('No se pudo actualizar el usuario');
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error en solicitar-admin:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al procesar solicitud: ' + error.message 
+    });
+  }
+});
+
+// Verificar estado de admin request
+router.get('/api/admin-request-status', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: 'No autenticado' });
+  }
+
+  try {
+    const [rows] = await pool.query(
+      'SELECT Admin_Request, Es_Admin FROM Usuarios WHERE ID_Usuario = ?',
+      [req.session.user.id]
+    );
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.json({
+      hasRequested: rows[0].Admin_Request,
+      isAdmin: rows[0].Es_Admin
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al verificar estado' });
+  }
+});
