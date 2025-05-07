@@ -23,6 +23,7 @@ create table Usuarios (
     Admin_Request boolean default false,
     Correo_Usuario varchar (100) unique not null,
     Password_Usuario varchar(100) not null,
+    telefono varchar (50),
     PRIMARY KEY (ID_Usuario)
 );
 
