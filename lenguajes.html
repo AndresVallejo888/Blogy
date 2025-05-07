@@ -196,17 +196,82 @@
       background-color: red;
     }
 
+    .popup-blog {
+      background-color: #f5f0e1;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      padding: 2rem;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      margin: 1rem;
+    }
+
+    .popup-blog h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: #e91e63;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    .popup-blog .close-popup {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #e91e63;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .popup-blog .close-popup:hover {
+      color: #c2185b;
+    }
+
+    .popup-blog .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .popup-blog label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #333;
+    }
+
     .popup-blog input,
     .popup-blog textarea {
       width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
+      padding: 0.8rem;
       font-size: 1rem;
-      border-radius: 6px;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      transition: border 0.3s;
+      box-sizing: border-box;
     }
 
-    .popup-blog button {
+    .popup-blog textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    .popup-blog input:focus,
+    .popup-blog textarea:focus {
+      border-color: #e91e63;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.2);
+    }
+
+    .popup-blog .submit-btn {
       background-color: #e91e63;
       color: white;
       border: none;
@@ -214,6 +279,13 @@
       font-size: 1rem;
       border-radius: 8px;
       cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s;
+      font-weight: 500;
+    }
+
+    .popup-blog .submit-btn:hover {
+      background-color: #c2185b;
     }
     .search-container {
       display: flex;
@@ -264,6 +336,102 @@
       color: #666;
       font-style: italic;
     }
+    .blog-post {
+      background-color: #fff;
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .blog-post.expanded {
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .blog-content {
+      display: none;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #eee;
+    }
+    
+    .blog-post.expanded .blog-content {
+      display: block;
+    }
+    
+    .comments-section {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px dashed #ddd;
+    }
+    
+    .comments-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+    }
+    
+    .comment {
+      background-color: #f9f9f9;
+      padding: 0.8rem;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+    }
+    
+    .comment-author {
+      font-weight: bold;
+      color: #e91e63;
+      font-size: 0.9rem;
+    }
+    
+    .comment-date {
+      font-size: 0.8rem;
+      color: #666;
+      margin-left: 0.5rem;
+    }
+    
+    .comment-content {
+      margin-top: 0.3rem;
+      font-size: 0.95rem;
+    }
+    
+    .comment-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .comment-input {
+      flex: 1;
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    .comment-submit {
+      padding: 0 1.5rem;
+      background-color: #e91e63;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .comment-submit:hover {
+      background-color: #c2185b;
+    }
+    .comment-input:focus {
+      outline: 2px solid #e91e63;
+      border-color: transparent;
+    }
+
+    .comment-submit:focus {
+      outline: 2px solid #c2185b;
+    }
   </style>
 </head>
 <body>
@@ -298,6 +466,14 @@
   <div class="blog-list" id="blogList">
     <!-- Aquí se cargan los blogs dinámicamente -->
   </div>
+  <!-- POPUP COMENTARIO (nuevo) -->
+  <div class="popup" id="popupComment">
+    <div class="popup-content popup-comment">
+      <h2>Nuevo Comentario</h2>
+      <textarea id="commentContent" rows="5" placeholder="Escribe tu comentario..." required></textarea>
+      <button onclick="enviarComentario()">Publicar Comentario</button>
+    </div>
+  </div>
 
   <!-- POPUP USUARIO -->
   <div class="popup" id="popupUser">
@@ -315,10 +491,20 @@
   <!-- POPUP BLOG -->
   <div class="popup" id="popupBlog">
     <div class="popup-content popup-blog">
+      <button class="close-popup" onclick="cerrarPopup()" aria-label="Cerrar">&times;</button>
       <h2>Nuevo Blog</h2>
-      <input type="text" id="blogTitulo" placeholder="Título del blog" required>
-      <textarea id="blogContenido" rows="5" placeholder="Contenido del blog" required></textarea>
-      <button onclick="crearBlog()">Subir Blog</button>
+      
+      <div class="form-group">
+        <label for="blogTitulo">Título del blog</label>
+        <input type="text" id="blogTitulo" placeholder="Escribe el título aquí" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="blogContenido">Contenido del blog</label>
+        <textarea id="blogContenido" placeholder="Escribe el contenido aquí" required></textarea>
+      </div>
+      
+      <button class="submit-btn" onclick="crearBlog()">Subir Blog</button>
     </div>
   </div>
 
@@ -326,7 +512,7 @@
     // Constantes
     const TIPO_BLOG = 1; // ID de Lenguajes de Programación en tu BD
     let usuarioActual = null;
-    let todosLosBlogs = [];
+    let blogSeleccionado = null;
 
     // Cargar datos al iniciar
     document.addEventListener('DOMContentLoaded', async () => {
@@ -376,40 +562,185 @@
     }
 
     // Función para mostrar los blogs en la página
-    function mostrarBlogs(blogs) {
-      const blogList = document.getElementById('blogList');
-      blogList.innerHTML = '';
+    // Función para mostrar los blogs en la página
+      function mostrarBlogs(blogs) {
+        const blogList = document.getElementById('blogList');
+        blogList.innerHTML = '';
 
-      if (blogs.length === 0) {
-        blogList.innerHTML = '<p>No hay blogs aún. ¡Sé el primero en publicar!</p>';
-        return;
+        if (blogs.length === 0) {
+          blogList.innerHTML = '<p>No hay blogs aún. ¡Sé el primero en publicar!</p>';
+          return;
+        }
+
+        blogs.forEach(blog => {
+          const post = document.createElement('div');
+          post.className = 'blog-post';
+          post.dataset.blogId = blog.ID_Blog;
+          
+          // Formatear fecha
+          const fechaCreacion = new Date(blog.Fecha_Creacion);
+          const fechaFormateada = fechaCreacion.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          post.innerHTML = `
+            <h2>${blog.Titulo || 'Blog sin título'}</h2>
+            <div class="blog-meta">
+              Publicado por <span class="blog-author">${blog.Nombre_Usuario} ${blog.Apellido_Usuario}</span>
+              el <span class="blog-date">${fechaFormateada}</span>
+            </div>
+            <div class="blog-content">
+              <p>${blog.Contenido_Blog}</p>
+              <div class="comments-section">
+                <h3>Comentarios</h3>
+                <div class="comments-list" id="comments-${blog.ID_Blog}">
+                  <!-- Comentarios se cargan aquí -->
+                </div>
+                ${usuarioActual ? `
+                <div class="comment-form">
+                  <input type="text" class="comment-input" id="comment-input-${blog.ID_Blog}" placeholder="Escribe un comentario...">
+                  <button class="comment-submit" onclick="event.stopPropagation(); prepararComentario(${blog.ID_Blog})">Enviar</button>
+                </div>
+                ` : '<p>Inicia sesión para comentar</p>'}
+              </div>
+            </div>
+          `;
+          
+          blogList.appendChild(post);
+          
+          // Cargar comentarios para este blog
+          cargarComentarios(blog.ID_Blog);
+          
+          // Agregar evento de clic para expandir/contraer
+          post.addEventListener('click', function(e) {
+            // Verificar si el clic fue en un elemento que debería ignorar el toggle
+            const ignoreElements = ['INPUT', 'BUTTON', 'TEXTAREA'];
+            let target = e.target;
+            
+            // Subir en el árbol DOM para verificar los padres
+            while (target !== this) {
+              if (ignoreElements.includes(target.tagName)) {
+                return; // Salir si el clic fue en un elemento que debe ignorar el toggle
+              }
+              target = target.parentNode;
+            }
+            
+            // Toggle de la clase expanded
+            this.classList.toggle('expanded');
+            
+            // Si se está expandiendo, asegurarse de que los comentarios están cargados
+            if (this.classList.contains('expanded')) {
+              cargarComentarios(blog.ID_Blog);
+            }
+          });
+          
+          // Agregar evento específico al input de comentarios para prevenir el cierre
+          const commentInput = post.querySelector('.comment-input');
+          if (commentInput) {
+            commentInput.addEventListener('click', function(e) {
+              e.stopPropagation(); // Detener la propagación del evento
+            });
+          }
+        });
       }
 
-      blogs.forEach(blog => {
-        const post = document.createElement('div');
-        post.className = 'blog-post';
-        
-        // Formatear fecha
-        const fechaCreacion = new Date(blog.Fecha_Creacion);
-        const fechaFormateada = fechaCreacion.toLocaleDateString('es-ES', {
+      // Función para enviar un comentario
+      async function enviarComentario(blogId, contenido) {
+        try {
+          const response = await fetch('/api/comentarios', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              blogId,
+              contenido
+            })
+          });
+
+          if (response.ok) {
+            // Limpiar el input
+            const commentInput = document.getElementById(`comment-input-${blogId}`);
+            if (commentInput) commentInput.value = '';
+            
+            // Recargar comentarios
+            await cargarComentarios(blogId);
+          } else {
+            const result = await response.json();
+            alert(result.message || 'Error al publicar el comentario');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al conectar con el servidor');
+        }
+      }
+    async function cargarComentarios(blogId) {
+      try {
+        const response = await fetch(`/api/comentarios?blog=${blogId}`);
+        if (response.ok) {
+          const comentarios = await response.json();
+          mostrarComentarios(blogId, comentarios);
+        }
+      } catch (error) {
+        console.error('Error al cargar comentarios:', error);
+      }
+    }
+
+    // Función para mostrar comentarios
+    function mostrarComentarios(blogId, comentarios) {
+      const commentsContainer = document.getElementById(`comments-${blogId}`);
+      if (!commentsContainer) return;
+      
+      commentsContainer.innerHTML = '';
+      
+      if (comentarios.length === 0) {
+        commentsContainer.innerHTML = '<p>No hay comentarios aún. ¡Sé el primero en comentar!</p>';
+        return;
+      }
+      
+      comentarios.forEach(comentario => {
+        const fechaComentario = new Date(comentario.Fecha_Comentario);
+        const fechaFormateada = fechaComentario.toLocaleDateString('es-ES', {
           day: '2-digit',
           month: 'long',
           year: 'numeric',
           hour: '2-digit',
           minute: '2-digit'
         });
-
-        post.innerHTML = `
-          <h2>${blog.Titulo || 'Blog sin título'}</h2>
-          <div class="blog-meta">
-            Publicado por <span class="blog-author">${blog.Nombre_Usuario} ${blog.Apellido_Usuario}</span>
-            el <span class="blog-date">${fechaFormateada}</span>
+        
+        const commentDiv = document.createElement('div');
+        commentDiv.className = 'comment';
+        commentDiv.innerHTML = `
+          <div>
+            <span class="comment-author">${comentario.Nombre_Usuario} ${comentario.Apellido_Usuario}</span>
+            <span class="comment-date">${fechaFormateada}</span>
           </div>
-          <p>${blog.Contenido_Blog}</p>
+          <div class="comment-content">${comentario.Contenido_Comentario}</div>
         `;
-        blogList.appendChild(post);
+        
+        commentsContainer.appendChild(commentDiv);
       });
     }
+
+
+    // Preparar para enviar un comentario
+    function prepararComentario(blogId) {
+      const commentInput = document.getElementById(`comment-input-${blogId}`);
+      const contenido = commentInput.value.trim();
+      
+      if (!contenido) {
+        alert('Por favor escribe un comentario');
+        return;
+      }
+      
+      enviarComentario(blogId, contenido);
+    }
+    
+
 
     async function filtrarBlogs() {
       const searchText = document.getElementById('searchInput').value.trim();

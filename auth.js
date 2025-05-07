@@ -179,3 +179,52 @@ router.post('/api/blogs', async (req, res) => {
 });
 
 module.exports = router;
+
+// Obtener comentarios de un blog
+router.get('/api/comentarios', async (req, res) => {
+  const { blog } = req.query;
+  
+  if (!blog) {
+    return res.status(400).json({ message: 'ID de blog requerido' });
+  }
+
+  try {
+    const [comentarios] = await pool.query(`
+      SELECT c.*, u.Nombre_Usuario, u.Apellido_Usuario 
+      FROM Comentarios c
+      JOIN Usuarios u ON c.ID_Usuario = u.ID_Usuario
+      WHERE c.ID_Blog = ?
+      ORDER BY c.Fecha_Comentario DESC
+    `, [blog]);
+    
+    res.json(comentarios);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener comentarios' });
+  }
+});
+
+// Crear nuevo comentario
+router.post('/api/comentarios', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: 'No autenticado' });
+  }
+
+  const { blogId, contenido } = req.body;
+
+  if (!blogId || !contenido) {
+    return res.status(400).json({ message: 'Datos incompletos' });
+  }
+
+  try {
+    await pool.query(
+      'INSERT INTO Comentarios (ID_Blog, ID_Usuario, Fecha_Comentario, Contenido_Comentario) VALUES (?, ?, NOW(), ?)',
+      [blogId, req.session.user.id, contenido]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al crear comentario' });
+  }
+});
