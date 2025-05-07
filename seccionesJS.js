@@ -1,5 +1,4 @@
 // Constantes
-const TIPO_BLOG = 1; // ID de Lenguajes de Programación en tu BD
 let usuarioActual = null;
 let blogSeleccionado = null;
 
@@ -51,7 +50,6 @@ async function cargarBlogs() {
   }
   
 
-// Función para mostrar los blogs en la página
 // Función para mostrar los blogs en la página
   function mostrarBlogs(blogs) {
     const blogList = document.getElementById('blogList');
@@ -168,17 +166,17 @@ async function cargarBlogs() {
       alert('Error al conectar con el servidor');
     }
   }
-async function cargarComentarios(blogId) {
-  try {
-    const response = await fetch(`/api/comentarios?blog=${blogId}`);
-    if (response.ok) {
-      const comentarios = await response.json();
-      mostrarComentarios(blogId, comentarios);
+    async function cargarComentarios(blogId) {
+    try {
+        const response = await fetch(`/api/comentarios?blog=${blogId}`);
+        if (response.ok) {
+        const comentarios = await response.json();
+        mostrarComentarios(blogId, comentarios);
+        }
+    } catch (error) {
+        console.error('Error al cargar comentarios:', error);
     }
-  } catch (error) {
-    console.error('Error al cargar comentarios:', error);
-  }
-}
+    }
 
 // Función para mostrar comentarios
 function mostrarComentarios(blogId, comentarios) {
