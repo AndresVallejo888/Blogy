@@ -12,7 +12,7 @@
   }
   
   /* ------------------ PÁGINAS CON FONDO ------------------ */
-  .index-page, .login-page, .signup-page, .home-page {
+  .index-page, .login-page, .signup-page, .home-page, .login-admin-page{
     background-image: url('images/fondo-index.jpg'); /* <-- CAMBIA A TU IMAGEN */
     background-size: cover;
     background-position: center;
