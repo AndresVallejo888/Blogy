@@ -60,7 +60,7 @@ router.post('/registro', async (req, res) => {
 
 // Procesar login
 router.post('/login', async (req, res) => {
-  const { email, password, isAdminLogin } = req.body; // Añadir isAdminLogin
+  const { email, password } = req.body;
 
   try {
     // Buscar usuario
@@ -85,14 +85,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Verificar si es login de admin y el usuario no es admin
-    if (isAdminLogin && !user.Es_Admin) {
-      return res.status(403).json({ 
-        success: false, 
-        message: 'No tienes privilegios de administrador' 
-      });
-    }
-
     // Crear sesión
     req.session.user = {
       id: user.ID_Usuario,
@@ -102,10 +94,7 @@ router.post('/login', async (req, res) => {
       isAdmin: user.Es_Admin
     };
 
-    res.json({ 
-      success: true,
-      isAdmin: user.Es_Admin 
-    });
+    res.json({ success: true });
   } catch (error) {
     console.error(error);
     res.status(500).json({ 
