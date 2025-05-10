@@ -42,22 +42,43 @@
         }
     </style>
     <script>
+        // Verificar sesión al cargar
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/usuario-actual');
+                if (response.ok) {
+                    const user = await response.json();
+                    if (!user.isAdmin) {
+                        window.location.href = '/login-admin.html';
+                    }
+                    // Actualizar panel de usuario con datos reales
+                    document.getElementById('userName').textContent = `${user.nombre} ${user.apellido}`;
+                    document.getElementById('userEmail').textContent = user.email;
+                } else {
+                    window.location.href = '/login-admin.html';
+                }
+            } catch (error) {
+                console.error('Error verificando sesión:', error);
+                window.location.href = '/login-admin.html';
+            }
+        });
+
         function toggleUserPanel() {
             const panel = document.getElementById('userPanel');
             panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
         }
 
-        function logout() {
-            localStorage.clear(); // limpia datos en caso de que uses localStorage
-            window.location.href = 'index.html';
-            setTimeout(() => {
-                window.location.reload(); // fuerza recarga
-            }, 100);
+        async function logout() {
+            try {
+                await fetch('/logout', { method: 'GET' });
+                window.location.href = '/login-admin.html';
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+            }
         }
     </script>
 </head>
 <body>
-
     <div class="header">BLOGY - Administrador</div>
     
     <!-- Icono de usuario -->
@@ -67,8 +88,8 @@
 
     <!-- Panel de usuario -->
     <div id="userPanel" class="user-panel">
-        <strong>Andres Vallejo</strong>
-        <small>correo@correo.com</small>
+        <strong id="userName">Cargando...</strong>
+        <small id="userEmail">cargando@correo.com</small>
         <a href="#" class="logout-btn" onclick="logout()">Cerrar Sesión</a>
     </div>
 
@@ -93,6 +114,5 @@
             <a href="reportes.html">Haz click aquí</a>
         </div>
     </div>
-
 </body>
 </html>
