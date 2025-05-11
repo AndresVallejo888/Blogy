@@ -2,30 +2,116 @@
 body {
   margin: 0;
   font-family: 'Arial', sans-serif;
-  background: #fffaf6;
+  background: #fdf7f3;
+  color: #333;
 }
 
+/* Estilos del Header (Top Bar) */
 .top-bar {
+  background: linear-gradient(to right, #ff7eb3, #ff758c); /* Usando el degradado que tenías para reportes */
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
   display: flex;
   align-items: center;
-  padding: 10px 20px;
-  background: linear-gradient(to right, #ff7eb3, #ff758c);
+  justify-content: space-between; /* Esto debería empujar el user-menu-container a la derecha */
+  max-width: 1200px; /* O el ancho que prefieras */
+  margin: 0 auto; /* Centra el contenido del header si es más estrecho que la ventana */
 }
 
 .back-arrow {
-  margin-right: auto;
-  font-size: 24px;
+  font-size: 28px;
   text-decoration: none;
-  color: black;
+  color: #fff; /* Flecha blanca para contraste */
+  margin-right: 20px; /* Espacio para que no esté pegado al logo si el logo se mueve */
+}
+.back-arrow:hover {
+    color: #f0f0f0;
 }
 
+
 .logo {
-  width: 100px;
+  height: 40px; /* Ajustar altura */
+  width: auto; /* Para mantener proporción */
+  display: block; /* Para evitar espacio extra debajo si es inline */
+}
+
+.user-menu-container {
+  position: relative; /
 }
 
 .user-icon {
-  margin-left: auto;
-  font-size: 24px;
+  cursor: pointer;
+  width: 40px; /* Tamaño del contenedor del icono */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  /* background-color: rgba(255,255,255,0.2); Opcional: un ligero fondo */
+}
+
+.user-icon img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #fff; /* Borde sutil */
+}
+
+.user-menu {
+  display: none; /* Oculto por defecto */
+  position: absolute;
+  right: 0;
+  top: 55px; /* Ajusta para que quede bien debajo del icono */
+  background: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Sombra más definida */
+  text-align: left;
+  min-width: 230px; /* Ancho mínimo del desplegable */
+  z-index: 1000; /* Encima de otros elementos */
+  border: 1px solid #e0e0e0; /* Borde sutil */
+}
+
+.user-menu.show {
+  display: block; /* Se muestra cuando tiene la clase 'show' */
+}
+
+.user-menu p {
+  margin: 8px 0;
+  font-size: 0.95em;
+}
+.user-menu .nombre {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 1em;
+    color: #333;
+}
+.user-menu .correo {
+    font-size: 0.85em;
+    color: #555;
+    margin-bottom: 15px;
+    word-break: break-all;
+}
+
+.user-menu button {
+  background: #e05c7d; /* Color del tema */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  width: 100%;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.95em;
+  transition: background-color 0.3s ease;
+}
+
+.user-menu button:hover {
+  background: #c74b68; /* Más oscuro al pasar el mouse */
 }
 
 .reportes-container {
@@ -93,4 +179,220 @@ h1 {
   color: #d22;
   cursor: pointer;
   margin-left: 10px;
+}
+.reportes-container {
+  max-width: 900px; /* Más ancho para los reportes */
+  margin: 40px auto;
+  padding: 30px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.reportes-container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 1.8em;
+}
+
+.filtros {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  gap: 20px; /* Espacio entre grupos de filtros */
+  flex-wrap: wrap; /* Para que se ajusten en pantallas pequeñas */
+}
+
+.filtro-item {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre label y select/input */
+}
+
+.filtros label {
+  font-weight: bold;
+  color: #555;
+}
+
+.filtros select, .filtros input[type="text"] {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95em;
+  min-width: 200px; /* Ancho mínimo para select e input */
+}
+.filtros select:focus, .filtros input[type="text"]:focus {
+    border-color: #fcb0b3;
+    box-shadow: 0 0 0 3px rgba(252, 176, 179, 0.2);
+    outline: none;
+}
+
+.busqueda { /* Hereda de .filtro-item si está anidado, o define display:flex si es independiente */
+  display: flex; /* Asegurar que el input y botón de búsqueda estén en línea */
+  align-items: center;
+  gap: 10px;
+}
+
+.busqueda input[type="text"] {
+    flex-grow: 1; /* Para que el input ocupe el espacio disponible si es necesario */
+}
+
+button.search-btn {
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: none;
+  background-color: #ffa3d4;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+button.search-btn:hover {
+    background-color: #fc9cc7;
+}
+
+.lista-reportes {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.lista-reportes li {
+  background: #fdfdfd;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ececec;
+  display: flex; /* Para alinear la inicial y la info */
+  align-items: flex-start; /* Alinear al inicio por si el texto tiene varias líneas */
+  gap: 15px; /* Espacio entre la inicial y la info */
+}
+
+.lista-reportes .inicial {
+  display: inline-flex; /* Usar flex para centrar el texto dentro */
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #fcb0b3; /* Color de fondo para la inicial */
+  color: white;
+  font-size: 1.2em;
+  font-weight: bold;
+  flex-shrink: 0; /* Para que no se encoja */
+}
+
+.lista-reportes .reporte-info {
+    flex-grow: 1; /* Para que la info ocupe el espacio */
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+.lista-reportes .reporte-info strong { /* Para la acción como "creó", "editó" */
+    color: #e05c7d; /* Color rosado para destacar la acción */
+}
+
+.lista-reportes .reporte-info small {
+  display: block; /* Para que la fecha y la sección estén en líneas separadas */
+  color: #777;
+  margin-top: 4px;
+  font-size: 0.85em;
+}
+.lista-reportes .reporte-info small.tipo-blog-tag {
+    background-color: #f0f0f0;
+    color: #555;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block; /* Para que solo ocupe lo necesario */
+    margin-top: 6px;
+}
+
+
+.lista-reportes .delete { /* Placeholder para el botón de eliminar reporte (si lo necesitas) */
+  color: #aaa;
+  cursor: pointer;
+  font-size: 1.2em;
+  margin-left: auto; /* Empuja el delete a la derecha */
+  padding: 5px;
+}
+.lista-reportes .delete:hover {
+  color: #f44336;
+}
+
+.status-message {
+    text-align: center;
+    padding: 20px;
+    color: #777;
+    font-style: italic;
+    font-size: 1em;
+}
+.status-message.error {
+    color: #d9534f;
+    font-style: normal;
+    font-weight: bold;
+}
+.filtros {
+  display: flex;
+  /* justify-content: space-between; */ /* Puede que quieras 'flex-start' o 'center' si tienes varios items */
+  justify-content: flex-start; /* Para alinear a la izquierda y que se envuelvan */
+  align-items: center;
+  margin-bottom: 25px;
+  gap: 15px; /* Espacio entre CADA grupo de filtro */
+  flex-wrap: wrap; 
+}
+
+.filtro-item {
+  display: flex;
+  align-items: center;
+  gap: 8px; 
+  margin-bottom: 10px; /* Espacio inferior si se envuelven */
+}
+
+.filtros label {
+  font-weight: bold;
+  color: #555;
+  white-space: nowrap; /* Evita que el label se parta en dos líneas */
+}
+
+.filtros select, 
+.filtros input[type="text"],
+.filtros input[type="date"] { /* Añadir input[type="date"] aquí */
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95em;
+  /* min-width: 180px; /* Ajustar según necesidad */
+}
+
+.filtros input[type="date"] {
+    min-width: auto; /* Dejar que el navegador decida el ancho para date */
+    width: 150px; /* O un ancho fijo que te guste */
+}
+
+.filtros select:focus, 
+.filtros input[type="text"]:focus,
+.filtros input[type="date"]:focus { /* Añadir input[type="date"] aquí */
+    border-color: #fcb0b3;
+    box-shadow: 0 0 0 3px rgba(252, 176, 179, 0.2);
+    outline: none;
+}
+
+/* El botón de búsqueda ya tiene su clase .search-btn */
+/* El nuevo botón "Aplicar Filtros" puede usar la misma clase .search-btn o una nueva */
+#btnAplicarFiltrosReportes {
+  padding: 10px 18px; /* Un poco más de padding para el botón principal */
+  border-radius: 6px;
+  border: none;
+  background-color: #e05c7d; /* Un color distintivo */
+  color: white;
+  font-size: 0.95em;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+#btnAplicarFiltrosReportes:hover {
+    background-color: #c74b68;
 }

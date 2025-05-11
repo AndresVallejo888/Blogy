@@ -41,17 +41,6 @@ app.use((req, res, next) => {
 });
 
 
-// Middleware para /api que establece Content-Type (Considera si es necesario o dejar que Express lo maneje)
-// Podría ser útil si quieres forzarlo, pero generalmente res.json() lo hace.
-// Si lo mantienes, asegúrate de que no oculte problemas.
-/*
-app.use('/api', (req, res, next) => {
-  console.log('LOG: Middleware /api - Estableciendo Content-Type a application/json');
-  res.setHeader('Content-Type', 'application/json');
-  next();
-});
-*/
-
 // =============================================
 // Configuración de Rutas
 // =============================================

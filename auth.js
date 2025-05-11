@@ -481,4 +481,74 @@ router.get('/solicitudes.html', isAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'solicitudes.html'));
 });
 
+
+// REPORTES-------------------------------------------------------------------------------
+router.get('/api/admin/reportes/actividades', isAdmin, async (req, res) => {
+  console.log('LOG: Accediendo a /api/admin/reportes/actividades con query:', req.query);
+  try {
+      let querySQL = `
+          SELECT 
+              A.ID_Actividad, 
+              A.Fecha_Actividad, 
+              A.Tipo_Accion, 
+              A.Entidad_Afectada,
+              A.ID_Entidad_Afectada,
+              A.Detalles,
+              U.Nombre_Usuario, 
+              U.Apellido_Usuario,
+              TB.Tipo_Blog AS Nombre_TipoBlog 
+          FROM Actividades A
+          JOIN Usuarios U ON A.ID_Usuario = U.ID_Usuario
+          LEFT JOIN TipoBlog TB ON A.ID_TipoBlog_Afectado = TB.ID_TipoBlog
+      `;
+      const params = [];
+      const conditions = [];
+
+      const { idTipoBlog, tipoReporte, searchTerm } = req.query;
+
+      if (tipoReporte === 'usuarios') {
+          conditions.push(`(A.Tipo_Accion = 'REGISTRO_USUARIO' OR A.Tipo_Accion = 'PROMOVER_A_ADMIN' OR A.Tipo_Accion = 'SOLICITUD_ADMIN' OR A.Tipo_Accion = 'DENEGAR_SOLICITUD_ADMIN')`);
+      } else if (idTipoBlog && idTipoBlog !== 'todos' && idTipoBlog !== 'usuarios_general') { // 'usuarios_general' para todos los tipos de acciones de usuario
+          conditions.push(`A.ID_TipoBlog_Afectado = ?`);
+          params.push(idTipoBlog);
+      }
+      // No se filtra por ID_TipoBlog si es 'todos' o 'usuarios_general' para actividades de blog/comentario
+
+      if (searchTerm) {
+          conditions.push(`(U.Nombre_Usuario LIKE ? OR U.Apellido_Usuario LIKE ? OR A.Detalles LIKE ?)`);
+          params.push(`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`);
+      }
+
+      if (conditions.length > 0) {
+          querySQL += ' WHERE ' + conditions.join(' AND ');
+      }
+
+      querySQL += ' ORDER BY A.Fecha_Actividad DESC LIMIT 100'; // Limitar resultados por defecto
+
+      const [actividades] = await pool.query(querySQL, params);
+      res.json(actividades);
+
+  } catch (error) {
+      console.error('Error en /api/admin/reportes/actividades:', error);
+      res.status(500).json({ success: false, message: 'Error al obtener actividades.' });
+  }
+});
+
+// Ruta para obtener los tipos de blog para el dropdown
+router.get('/api/tiposblog', async (req, res) => { // No necesita isAdmin si solo es para leer nombres
+  try {
+      const [tipos] = await pool.query('SELECT ID_TipoBlog, Tipo_Blog FROM TipoBlog ORDER BY Tipo_Blog');
+      res.json(tipos);
+  } catch (error) {
+      console.error('Error al obtener tipos de blog:', error);
+      res.status(500).json({ message: 'Error al obtener tipos de blog' });
+  }
+});
+
+// Ruta para servir reportes.html (ya deberías tener una similar o crearla)
+router.get('/reportes.html', isAdmin, (req, res) => {
+  console.log('LOG: Sirviendo /reportes.html (protegido por isAdmin)');
+  res.sendFile(path.join(__dirname, 'reportes.html')); // Ajusta la ruta si es necesario
+});
+
 module.exports = router;
