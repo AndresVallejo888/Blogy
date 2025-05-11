@@ -403,4 +403,82 @@ router.get('/dashboard-admin.html', isAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard-admin.html'));
 });
 
+// RUTA PARA OBTENER SOLICITUDES DE ADMIN PENDIENTES
+router.get('/api/admin/solicitudes-pendientes', isAdmin, async (req, res) => {
+  console.log('LOG: Accediendo a /api/admin/solicitudes-pendientes');
+  try {
+    const [solicitudes] = await pool.query(
+      'SELECT ID_Usuario, Nombre_Usuario, Apellido_Usuario, telefono FROM Usuarios WHERE Admin_Request = TRUE AND Es_Admin = FALSE'
+    );
+    res.json(solicitudes);
+  } catch (error) {
+    console.error('Error en /api/admin/solicitudes-pendientes:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener solicitudes pendientes.' });
+  }
+});
+
+// RUTA PARA ACEPTAR UNA SOLICITUD DE ADMIN
+router.post('/api/admin/aceptar-solicitud', isAdmin, async (req, res) => {
+  const { idUsuario } = req.body; // Esperamos que el frontend envíe el ID del usuario
+  console.log(`LOG: Accediendo a /api/admin/aceptar-solicitud para ID_Usuario: ${idUsuario}`);
+
+  if (!idUsuario) {
+    return res.status(400).json({ success: false, message: 'ID de usuario requerido.' });
+  }
+
+  try {
+    // Actualizar el usuario a admin y resetear la solicitud
+    const [result] = await pool.query(
+      'UPDATE Usuarios SET Es_Admin = TRUE, Admin_Request = FALSE WHERE ID_Usuario = ?',
+      [idUsuario]
+    );
+
+    if (result.affectedRows === 0) {
+      console.log(`LOG: /api/admin/aceptar-solicitud - Usuario no encontrado o no se pudo actualizar: ${idUsuario}`);
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado o no se pudo actualizar.' });
+    }
+
+    console.log(`LOG: /api/admin/aceptar-solicitud - Solicitud aceptada para ID_Usuario: ${idUsuario}`);
+    res.json({ success: true, message: 'Solicitud aceptada con éxito.' });
+  } catch (error) {
+    console.error('Error en /api/admin/aceptar-solicitud:', error);
+    res.status(500).json({ success: false, message: 'Error al aceptar la solicitud.' });
+  }
+});
+
+// RUTA PARA DENEGAR UNA SOLICITUD DE ADMIN
+router.post('/api/admin/denegar-solicitud', isAdmin, async (req, res) => {
+  const { idUsuario } = req.body; // Esperamos que el frontend envíe el ID del usuario
+  console.log(`LOG: Accediendo a /api/admin/denegar-solicitud para ID_Usuario: ${idUsuario}`);
+
+  if (!idUsuario) {
+    return res.status(400).json({ success: false, message: 'ID de usuario requerido.' });
+  }
+
+  try {
+    // Resetear la solicitud y borrar el teléfono
+    const [result] = await pool.query(
+      'UPDATE Usuarios SET Admin_Request = FALSE, telefono = NULL WHERE ID_Usuario = ?',
+      [idUsuario]
+    );
+
+    if (result.affectedRows === 0) {
+      console.log(`LOG: /api/admin/denegar-solicitud - Usuario no encontrado o no se pudo actualizar: ${idUsuario}`);
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado o no se pudo actualizar.' });
+    }
+    
+    console.log(`LOG: /api/admin/denegar-solicitud - Solicitud denegada para ID_Usuario: ${idUsuario}`);
+    res.json({ success: true, message: 'Solicitud denegada con éxito.' });
+  } catch (error) {
+    console.error('Error en /api/admin/denegar-solicitud:', error);
+    res.status(500).json({ success: false, message: 'Error al denegar la solicitud.' });
+  }
+});
+
+// También necesitarás una ruta para servir solicitudes.html, protegida por isAdmin
+router.get('/solicitudes.html', isAdmin, (req, res) => {
+    console.log('LOG: Sirviendo /solicitudes.html (protegido por isAdmin)');
+    res.sendFile(path.join(__dirname, 'solicitudes.html'));
+});
+
 module.exports = router;

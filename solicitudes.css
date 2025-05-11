@@ -1,86 +1,343 @@
-
+/* Estilos Generales */
 body {
   margin: 0;
   font-family: 'Arial', sans-serif;
-  background: #fffaf6;
+  background: #fdf7f3; /* Un fondo aún más suave si #fffaf6 era muy similar al blanco */
+  color: #333;
 }
 
+/* Estilos del Header (Top Bar) */
 .top-bar {
+  background: linear-gradient(to right, #fcb0b3, #ffa3d4);
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
   display: flex;
   align-items: center;
-  padding: 10px 20px;
-  background: linear-gradient(to right, #fcb0b3, #ffa3d4);
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .back-arrow {
-  margin-right: auto;
-  font-size: 24px;
+  font-size: 28px;
   text-decoration: none;
-  color: black;
+  color: #fff;
+  margin-right: 20px;
+  transition: color 0.3s ease;
+}
+
+.back-arrow:hover {
+    color: #f0f0f0;
+}
+
+.logo-container {
+  /* Ajustes adicionales si el logo no se centra bien con space-between */
+  /* Por ejemplo, podrías darle flex-grow: 1 y text-align: center si es necesario */
 }
 
 .logo {
-  width: 100px;
+  height: 40px;
+  width: auto;
+}
+
+.user-menu-container {
+  position: relative;
 }
 
 .user-icon {
-  margin-left: auto;
-  font-size: 24px;
+  cursor: pointer;
 }
 
+.user-icon img {
+    width: 36px; /* Ligeramente más grande */
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff; /* Borde más prominente */
+}
+
+.user-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 50px; /* Un poco más abajo para no solapar el icono */
+  background: white;
+  padding: 15px 20px; /* Más padding horizontal */
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15); /* Sombra más pronunciada */
+  text-align: left;
+  min-width: 230px;
+  z-index: 1000;
+  border: 1px solid #eee;
+}
+
+.user-menu.show {
+  display: block;
+}
+
+.user-menu p {
+  margin: 8px 0;
+  font-size: 0.95em; /* Ligeramente más grande */
+}
+.user-menu .nombre {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 1em;
+    color: #333;
+}
+.user-menu .correo {
+    font-size: 0.85em;
+    color: #555;
+    margin-bottom: 15px;
+    word-break: break-all; /* Para correos largos */
+}
+
+.user-menu button {
+  background: #e05c7d;
+  color: white;
+  border: none;
+  padding: 10px 15px; /* Más padding */
+  border-radius: 6px;
+  width: 100%;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.95em; /* Botón ligeramente más grande */
+  transition: background-color 0.3s ease;
+}
+
+.user-menu button:hover {
+  background: #c74b68;
+}
+
+
+/* Contenedor Principal de Solicitudes */
 .solicitudes-container {
-  max-width: 700px;
-  margin: 30px auto;
-  padding: 20px;
-  background: #fddde6;
-  border: 1px solid #f3b3c2;
-  border-radius: 10px;
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-h1 {
+.solicitudes-container h1 {
   text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 1.8em;
 }
 
+/* Sección de Búsqueda */
 .busqueda {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  gap: 10px;
 }
 
-.busqueda input {
-  padding: 6px;
+.busqueda input[type="text"] {
+  padding: 10px 12px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  margin-right: 5px;
+  font-size: 0.95em;
+  width: 280px; /* Un poco más de ancho */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.busqueda input[type="text"]:focus {
+    border-color: #fcb0b3;
+    box-shadow: 0 0 0 3px rgba(252, 176, 179, 0.2); /* Sombra de foco más visible */
+    outline: none;
 }
 
+
+.busqueda button.search-btn {
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: none;
+  background-color: #ffa3d4;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.busqueda button.search-btn:hover {
+    background-color: #fc9cc7; /* Un poco más claro en hover */
+}
+
+
+/* Lista de Solicitudes */
 .lista-solicitudes {
   list-style: none;
   padding: 0;
 }
 
 .lista-solicitudes li {
-  background: #f9cfd8;
-  padding: 15px;
+  background: #fdfdfd; /* Fondo casi blanco */
+  padding: 15px 20px;
   border-radius: 8px;
   margin-bottom: 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border: 1px solid #ececec;
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out; /* Animación más suave */
+}
+.lista-solicitudes li:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra más notable en hover */
+    transform: translateY(-2px); /* Efecto de elevación ligero */
 }
 
-.acciones button {
+.lista-solicitudes .info {
+  flex-grow: 1;
+  margin-right: 15px;
+}
+.lista-solicitudes .info strong {
+    font-size: 1.1em;
+    color: #333;
+}
+.lista-solicitudes .info span { /* Estilo para el teléfono */
+    font-size: 0.9em;
+    color: #555;
+    display: block; /* Para que ocupe su propia línea si es necesario */
+    margin-top: 4px;
+}
+
+
+.lista-solicitudes .acciones button {
   margin-left: 10px;
-  padding: 6px 10px;
-  border-radius: 20px;
-  border: 1px solid #aaa;
+  padding: 9px 18px; /* Ajuste de padding */
+  border-radius: 25px;
+  border: none;
   cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  min-width: 90px; /* Ancho mínimo para que los botones no se vean muy pequeños */
+  text-align: center;
+}
+.lista-solicitudes .acciones button:hover {
+    transform: scale(1.05); /* Ligero agrandamiento al pasar el mouse */
+}
+.lista-solicitudes .acciones button:active {
+    transform: scale(0.98); /* Efecto de click */
 }
 
-.aceptar {
-  background: #e5dbff;
+
+.lista-solicitudes .aceptar {
+  background: #4CAF50;
+  color: white;
+}
+.lista-solicitudes .aceptar:hover {
+  background: #45a049;
 }
 
-.denegar {
-  background: #ffe4e4;
+.lista-solicitudes .denegar {
+  background: #f44336;
+  color: white;
+}
+.lista-solicitudes .denegar:hover {
+  background: #e53935;
+}
+
+/* Mensaje de carga o sin solicitudes (compartido con loadingMessage) */
+.status-message { /* Nueva clase para estos mensajes */
+    text-align: center;
+    padding: 20px;
+    color: #777;
+    font-style: italic;
+    font-size: 1em;
+}
+.status-message.error { /* Estilo para mensajes de error en la carga de la lista */
+    color: #d9534f;
+    font-style: normal;
+    font-weight: bold;
+}
+
+
+/* Estilos para el Pop-up Personalizado */
+.custom-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Overlay un poco más oscuro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  opacity: 0; /* Inicialmente invisible para la animación */
+  visibility: hidden; /* Inicialmente no visible */
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+.custom-popup-overlay[style*="display: flex"] { /* Cuando se muestra */
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
+}
+
+
+.custom-popup-content {
+  background-color: #fff;
+  padding: 30px 35px; /* Más padding */
+  border-radius: 10px; /* Bordes más redondeados */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); /* Sombra más definida */
+  text-align: center;
+  min-width: 320px;
+  max-width: 450px; /* Un poco más de ancho máximo */
+  transform: scale(0.9); /* Para animación */
+  transition: transform 0.3s ease;
+}
+.custom-popup-overlay[style*="display: flex"] .custom-popup-content {
+    transform: scale(1);
+}
+
+
+.custom-popup-content p {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 1.15em; /* Texto del mensaje más grande */
+  color: #333;
+  line-height: 1.6;
+}
+
+.custom-popup-content button {
+  background-color: #e05c7d;
+  color: white;
+  border: none;
+  padding: 12px 30px; /* Botón más grande */
+  border-radius: 6px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-weight: 500;
+}
+
+.custom-popup-content button:hover {
+  background-color: #c74b68;
+}
+
+/* Tipos de Popup */
+.custom-popup-content.success p {
+    color: #28a745;
+}
+.custom-popup-content.success button {
+    background-color: #28a745;
+}
+.custom-popup-content.success button:hover {
+    background-color: #218838;
+}
+
+.custom-popup-content.error p {
+    color: #dc3545;
+}
+.custom-popup-content.error button {
+    background-color: #dc3545;
+}
+.custom-popup-content.error button:hover {
+    background-color: #c82333;
 }
