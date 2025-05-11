@@ -49,7 +49,7 @@ create table Comentarios(
     Fecha_Comentario datetime,
     Contenido_Comentario text not null,
     PRIMARY KEY (ID_Comentario),
-    CONSTRAINT fk_comentarios_blog FOREIGN KEY (ID_Blog) REFERENCES Blog(ID_Blog),
+    CONSTRAINT fk_comentarios_blog FOREIGN KEY (ID_Blog) REFERENCES Blog(ID_Blog) on delete cascade,
     CONSTRAINT fk_comentarios_usuario FOREIGN KEY (ID_Usuario) REFERENCES Usuarios(ID_Usuario)
 );
 

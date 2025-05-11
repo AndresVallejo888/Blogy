@@ -551,4 +551,137 @@ router.get('/reportes.html', isAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, 'reportes.html')); // Ajusta la ruta si es necesario
 });
 
+// RUTA PARA QUE ADMIN OBTENGA BLOGS (con filtros por tipo y término de búsqueda)
+router.get('/api/admin/blogs', isAdmin, async (req, res) => {
+  console.log('LOG AUTH.JS: Accediendo a /api/admin/blogs con query:', req.query);
+  try {
+      let querySQL = `
+          SELECT 
+              B.ID_Blog, B.Titulo, B.Fecha_Creacion, B.Contenido_Blog,
+              U.ID_Usuario, U.Nombre_Usuario, U.Apellido_Usuario,
+              TB.ID_TipoBlog, TB.Tipo_Blog
+          FROM Blog B
+          JOIN Usuarios U ON B.ID_Usuario = U.ID_Usuario
+          JOIN TipoBlog TB ON B.ID_TipoBlog = TB.ID_TipoBlog
+      `;
+      const params = [];
+      const conditions = [];
+
+      const { idTipoBlog, searchTerm } = req.query;
+
+      if (idTipoBlog && idTipoBlog !== 'todos' && idTipoBlog.trim() !== '') {
+          conditions.push(`B.ID_TipoBlog = ?`);
+          params.push(idTipoBlog);
+      }
+      if (searchTerm && searchTerm.trim() !== '') {
+          const searchTermLike = `%${searchTerm.trim()}%`;
+          conditions.push(`(B.Titulo LIKE ? OR B.Contenido_Blog LIKE ? OR U.Nombre_Usuario LIKE ? OR U.Apellido_Usuario LIKE ?)`);
+          params.push(searchTermLike, searchTermLike, searchTermLike, searchTermLike);
+      }
+
+      if (conditions.length > 0) {
+          querySQL += ' WHERE ' + conditions.join(' AND ');
+      }
+      querySQL += ' ORDER BY B.Fecha_Creacion DESC LIMIT 200';
+
+      console.log('SQL para Admin Blogs:', querySQL, params);
+      const [blogs] = await pool.query(querySQL, params);
+      res.json(blogs);
+
+  } catch (error) {
+      console.error('Error en /api/admin/blogs:', error);
+      res.status(500).json({ success: false, message: 'Error al obtener blogs para admin.' });
+  }
+});
+
+// RUTA PARA QUE ADMIN OBTENGA UN BLOG ESPECÍFICO Y SUS COMENTARIOS
+router.get('/api/admin/blog/:idBlogConComentarios', isAdmin, async (req, res) => {
+  const { idBlogConComentarios } = req.params;
+  console.log(`LOG AUTH.JS: Admin obteniendo blog ${idBlogConComentarios} con comentarios`);
+  if (isNaN(parseInt(idBlogConComentarios))) {
+      return res.status(400).json({ success: false, message: 'ID de Blog inválido.' });
+  }
+  try {
+      const [blogRows] = await pool.query(
+          `SELECT B.ID_Blog, B.Titulo, B.Fecha_Creacion, B.Contenido_Blog, 
+                  U.Nombre_Usuario, U.Apellido_Usuario, TB.Tipo_Blog 
+           FROM Blog B 
+           JOIN Usuarios U ON B.ID_Usuario = U.ID_Usuario
+           JOIN TipoBlog TB ON B.ID_TipoBlog = TB.ID_TipoBlog
+           WHERE B.ID_Blog = ?`, [idBlogConComentarios]
+      );
+
+      if (blogRows.length === 0) {
+          return res.status(404).json({ success: false, message: 'Blog no encontrado.' });
+      }
+      const blog = blogRows[0];
+
+      const [comentarios] = await pool.query(
+          `SELECT C.ID_Comentario, C.Fecha_Comentario, C.Contenido_Comentario, 
+                  U.Nombre_Usuario, U.Apellido_Usuario 
+           FROM Comentarios C 
+           JOIN Usuarios U ON C.ID_Usuario = U.ID_Usuario 
+           WHERE C.ID_Blog = ? 
+           ORDER BY C.Fecha_Comentario DESC`,
+          [idBlogConComentarios]
+      );
+
+      blog.comentarios = comentarios;
+      res.json(blog);
+
+  } catch (error) {
+      console.error(`Error obteniendo blog ${idBlogConComentarios} para admin:`, error);
+      res.status(500).json({ success: false, message: 'Error al obtener el blog y sus comentarios.' });
+  }
+});
+
+// RUTA PARA QUE ADMIN ELIMINE UN BLOG
+router.delete('/api/admin/blogs/:idBlog', isAdmin, async (req, res) => {
+  const { idBlog } = req.params;
+  console.log(`LOG AUTH.JS: Admin eliminando blog ${idBlog}`);
+  if (isNaN(parseInt(idBlog))) {
+      return res.status(400).json({ success: false, message: 'ID de Blog inválido.' });
+  }
+  try {
+      const [deleteBlogResult] = await pool.query('DELETE FROM Blog WHERE ID_Blog = ?', [idBlog]);
+
+      if (deleteBlogResult.affectedRows === 0) {
+          return res.status(404).json({ success: false, message: 'Blog no encontrado o ya eliminado.' });
+      }
+
+      res.json({ success: true, message: `Blog ID: ${idBlog} y todos sus comentarios asociados fueron eliminados por la base de datos.` });
+
+  } catch (error) {
+      console.error(`Error eliminando blog ${idBlog} para admin:`, error);
+      res.status(500).json({ success: false, message: 'Error al eliminar el blog.' });
+  }
+});
+
+
+// RUTA PARA QUE ADMIN ELIMINE UN COMENTARIO
+router.delete('/api/admin/comentarios/:idComentario', isAdmin, async (req, res) => {
+  const { idComentario } = req.params;
+  console.log(`LOG AUTH.JS: Admin eliminando comentario ${idComentario}`);
+  if (isNaN(parseInt(idComentario))) {
+      return res.status(400).json({ success: false, message: 'ID de Comentario inválido.' });
+  }
+  try {
+      const [result] = await pool.query('DELETE FROM Comentarios WHERE ID_Comentario = ?', [idComentario]);
+
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ success: false, message: 'Comentario no encontrado o ya eliminado.' });
+      }
+      res.json({ success: true, message: `Comentario ID: ${idComentario} eliminado.` });
+  } catch (error) {
+      console.error(`Error eliminando comentario ${idComentario} para admin:`, error);
+      res.status(500).json({ success: false, message: 'Error al eliminar el comentario.' });
+  }
+});
+
+// RUTA PARA SERVIR EL HTML DE MANEJO DE BLOGS (protegida por isAdmin)
+router.get('/manejarBlogs.html', isAdmin, (req, res) => {
+  console.log('LOG AUTH.JS: Sirviendo /manejarBlogs.html (protegido por isAdmin)');
+  res.sendFile(path.join(__dirname, 'manejarBlogs.html'));
+});
+
 module.exports = router;
