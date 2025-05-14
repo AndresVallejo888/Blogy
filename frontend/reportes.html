@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <title>Ver Reportes - Panel de Administrador</title>
-  <link rel="stylesheet" href="reportes.css" />
-  </head>
+  <link rel="stylesheet" href="styles/reportes.css" />
+</head>
 <body>
   <header class="top-bar">
     <div class="header-content">
-        <a href="dashboard-admin.html" class="back-arrow">←</a>
-        <div class="logo-container">
-            <img src="images/logo.png" alt="Logo Blogy" class="logo" />
+      <a href="dashboard-admin.html" class="back-arrow">←</a>
+      <div class="logo-container">
+        <img src="images/logo.png" alt="Logo Blogy" class="logo" />
+      </div>
+      <div class="user-menu-container">
+        <div class="user-icon" onclick="toggleMenu()">
+          <img src="images/user.png" alt="Usuario" />
         </div>
-        <div class="user-menu-container">
-            <div class="user-icon" onclick="toggleMenu()">
-                <img src="images/user.png" alt="Usuario" />
-            </div>
-            <div id="userMenu" class="user-menu">
-                <p class="nombre" id="adminUserName">Cargando...</p>
-                <p class="correo" id="adminUserEmail">Cargando...</p>
-                <button onclick="cerrarSesionAdmin()">Cerrar Sesión</button>
-            </div>
+        <div id="userMenu" class="user-menu">
+          <p class="nombre" id="adminUserName">Cargando...</p>
+          <p class="correo" id="adminUserEmail">Cargando...</p>
+          <button onclick="cerrarSesionAdmin()">Cerrar Sesión</button>
         </div>
+      </div>
     </div>
   </header>
 
@@ -33,7 +33,7 @@
         <select id="selectSeccionReporte">
           <option value="todos">Todas las Actividades de Blog/Comentario</option>
           <option value="usuarios_general">Actividades de Usuarios</option>
-          </select>
+        </select>
       </div>
       <div class="filtro-item busqueda">
         <input type="text" id="searchReporteInput" placeholder="Buscar en detalles o por usuario..." />
@@ -46,6 +46,6 @@
     </ul>
   </main>
 
-  <script src="reportes.js"></script>
+  <script src="js/reportes.js"></script>
 </body>
 </html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Editar Blog</title>
+  <link rel="stylesheet" href="styles/misBlogs.css" />
+  <style>
+    .form-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .form-container form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-container label {
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #444;
+    }
+
+    .form-container input,
+    .form-container textarea {
+      padding: 0.8rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .form-container textarea {
+      resize: vertical;
+    }
+
+    .form-container .publish-btn {
+      align-self: center;
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      border-radius: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">BLOGY</div>
+    <a href="home.html" class="back-button">←</a>
+  </header>
+
+  <section class="profile">
+    <img src="images/damian.png" alt="Usuario" />
+    <div class="profile-info">
+      <h2>Editar Blog</h2>
+      <p>Modifica el contenido de tu blog</p>
+    </div>
+  </section>
+
+  <section class="form-container">
+    <form id="editarForm">
+      <label for="titulo">Título</label>
+      <input type="text" id="titulo" name="titulo" required />
+
+      <label for="contenido">Contenido</label>
+      <textarea id="contenido" name="contenido" rows="8" required></textarea>
+
+      <button type="submit" class="publish-btn">Guardar cambios</button>
+    </form>
+  </section>
+
+  <script src="js/editarBlogs.js"></script>
+</body>
+</html>

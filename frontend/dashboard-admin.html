@@ -3,26 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administrador - Blogy</title>
-    <link rel="stylesheet" href="dashboard-admin.css">
+    <link rel="stylesheet" href="styles/dashboard-admin.css">
     <script>
-        // Verificar sesión al cargar
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch('/api/usuario-actual');
                 if (response.ok) {
                     const user = await response.json();
                     if (!user.isAdmin) {
-                        window.location.href = '/login-admin.html';
+                        window.location.href = '/front/login-admin.html';
                     }
-                    // Actualizar panel de usuario con datos reales
                     document.getElementById('userName').textContent = `${user.nombre} ${user.apellido}`;
                     document.getElementById('userEmail').textContent = user.email;
                 } else {
-                    window.location.href = '/login-admin.html';
+                    window.location.href = '/front/login-admin.html';
                 }
             } catch (error) {
                 console.error('Error verificando sesión:', error);
-                window.location.href = '/login-admin.html';
+                window.location.href = '/front/login-admin.html';
             }
         });
 
@@ -34,7 +32,7 @@
         async function logout() {
             try {
                 await fetch('/logout', { method: 'GET' });
-                window.location.href = '/login-admin.html';
+                window.location.href = '/front/login-admin.html';
             } catch (error) {
                 console.error('Error al cerrar sesión:', error);
             }
@@ -44,12 +42,10 @@
 <body>
     <div class="header">BLOGY - Administrador</div>
     
-    <!-- Icono de usuario -->
     <div class="user-toggle" onclick="toggleUserPanel()">
         <img src="images/user.png" alt="Usuario">
     </div>
 
-    <!-- Panel de usuario -->
     <div id="userPanel" class="user-panel">
         <strong id="userName">Cargando...</strong>
         <small id="userEmail">cargando@correo.com</small>
@@ -62,19 +58,19 @@
         <div class="card">
             <img src="images/editar.png" alt="Editar/Eliminar">
             <h2>Manejar Blogs</h2>
-            <a href="manejarBlogs.html">Haz click aquí</a>
+            <a href="/front/manejarBlogs.html">Haz click aquí</a>
         </div>
 
         <div class="card">
             <img src="images/solicitudes.png" alt="Solicitudes">
             <h2>Solicitudes</h2>
-            <a href="solicitudes.html">Haz click aquí</a>
+            <a href="/front/solicitudes.html">Haz click aquí</a>
         </div>
 
         <div class="card">
             <img src="images/reportes.png" alt="Ver Reportes">
             <h2>Ver Reportes</h2>
-            <a href="reportes.html">Haz click aquí</a>
+            <a href="/front/reportes.html">Haz click aquí</a>
         </div>
     </div>
 </body>

@@ -13,7 +13,7 @@
   
   /* ------------------ PÁGINAS CON FONDO ------------------ */
   .index-page, .login-page, .signup-page, .home-page, .login-admin-page{
-    background-image: url('images/fondo-index.jpg'); /* <-- CAMBIA A TU IMAGEN */
+    background-image: url('/images/fondo-index.jpg'); /* <-- CAMBIA A TU IMAGEN */
     background-size: cover;
     background-position: center;
     height: 100vh;
@@ -121,7 +121,7 @@
   
 /* ------------------ LOGIN ------------------ */
 .login-page {
-  background-image: url('images/fondo-index.jpg');
+  background-image: url('/images/fondo-index.jpg');
   background-size: cover;
   background-position: center;
   height: 100vh;
@@ -191,7 +191,7 @@
 
 /* ------------------ REGISTRO ------------------ */
 .register-page {
-  background-image: url('images/fondo-index.jpg'); /* Imagen de fondo */
+  background-image: url('/images/fondo-index.jpg'); /* Imagen de fondo */
   background-size: cover;
   background-position: center;
   height: 100vh;

@@ -5,7 +5,7 @@ body {
   }
 
   .header {
-    background-image: url('images/fondo-index.jpg');
+    background-image: url('/images/fondo-index.jpg');
     background-size: cover;
     background-position: center;
     padding: 1rem 2rem;
@@ -314,4 +314,11 @@ body {
 
   .blog-button:hover {
     background-color: #c2185b;
+  }
+
+
+  .logo-img-header {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
   }

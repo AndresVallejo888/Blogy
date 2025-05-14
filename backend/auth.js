@@ -1,30 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const db = require('./db'); // conexión centralizada con promesas
 
 // Configuración de la conexión a la base de datos
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
 
 // Ruta para servir el formulario de login de usuario normal
 router.get('/login.html', (req, res) => {
   // Asumiendo que login.html está en el mismo directorio que auth.js (raíz del proyecto)
-  res.sendFile(path.join(__dirname, 'login.html'));
+  res.sendFile(path.join(__dirname, '../frontend/login.html'));
 });
 
 // Ruta para servir el formulario de registro
 router.get('/registro.html', (req, res) => {
   // Asumiendo que registro.html está en el mismo directorio que auth.js (raíz del proyecto)
-  res.sendFile(path.join(__dirname, 'registro.html'));
+  res.sendFile(path.join(__dirname, '../frontend/registro.html'));
 });
 
 // Procesar registro
@@ -33,7 +24,7 @@ router.post('/registro', async (req, res) => {
   const { nombre, apellido, email, password } = req.body;
 
   try {
-    const [rows] = await pool.query('SELECT * FROM Usuarios WHERE Correo_Usuario = ?', [email]);
+    const [rows] = await db.query('SELECT * FROM Usuarios WHERE Correo_Usuario = ?', [email]);
     if (rows.length > 0) {
       console.log('LOG: /registro - Correo ya registrado:', email);
       return res.status(400).json({
@@ -43,7 +34,7 @@ router.post('/registro', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await pool.query(
+    await db.query(
       'INSERT INTO Usuarios (Nombre_Usuario, Apellido_Usuario, Correo_Usuario, Password_Usuario) VALUES (?, ?, ?, ?)',
       [nombre, apellido, email, hashedPassword]
     );
@@ -64,7 +55,7 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const [rows] = await pool.query('SELECT * FROM Usuarios WHERE Correo_Usuario = ?', [email]);
+    const [rows] = await db.query('SELECT * FROM Usuarios WHERE Correo_Usuario = ?', [email]);
     if (rows.length === 0) {
       console.log('LOG: /login - Usuario no encontrado:', email);
       return res.status(400).json({
@@ -130,8 +121,55 @@ router.get('/api/usuario-actual', (req, res) => {
   console.log('LOG: /api/usuario-actual - Usuario en sesión:', req.session.user);
   res.json(req.session.user); // Esto enviará el objeto de usuario, incluyendo isAdmin
 });
+// Obtener los blogs del usuario autenticado (para el botón "Mis Blogs")
+router.get('/mis-blogs', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'No autenticado' });
+  }
+  try {
+    const [blogs] = await db.query('SELECT * FROM Blog WHERE ID_Usuario = ? ORDER BY Fecha_Creacion DESC', [req.session.user.id]);
+    res.json({ success: true, blogs });
+  } catch (error) {
+    console.error('Error en /mis-blogs:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener tus blogs' });
+  }
+});
+
+
+// Sirve el archivo editar.html para usuarios autenticados
+router.get('/editarBlog.html', (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login.html'); // O enviar JSON si prefieres manejarlo en frontend
+  }
+  res.sendFile(path.join(__dirname, '../frontend/editarBlog.html'));
+});
+
 
 // --- RUTAS DE BLOGS Y COMENTARIOS (sin cambios mayores, solo logs de ejemplo) ---
+
+
+
+
+// Obtener un blog específico por ID (solo si el blog pertenece al usuario autenticado)
+router.get('/api/blogs/:id', async (req, res) => {
+  const blogId = req.params.id;
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'No autenticado' });
+  }
+
+  try {
+    const [rows] = await db.query('SELECT * FROM Blog WHERE ID_Blog = ? AND ID_Usuario = ?', [blogId, req.session.user.id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Blog no encontrado o no autorizado' });
+    }
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Error al obtener blog por ID:', error);
+    res.status(500).json({ success: false, message: 'Error en el servidor' });
+  }
+});
+
+
 router.get('/api/blogs', async (req, res) => {
   console.log('LOG: Accediendo a /api/blogs', req.query);
   // ... tu código existente ...
@@ -153,7 +191,7 @@ router.get('/api/blogs', async (req, res) => {
       params.push(`%${search}%`, `%${search}%`);
     }
     query += ' ORDER BY b.Fecha_Creacion DESC';
-    const [blogs] = await pool.query(query, params);
+    const [blogs] = await db.query(query, params);
     res.json(blogs);
   } catch (error) {
     console.error('Error en /api/blogs:', error);
@@ -172,7 +210,7 @@ router.post('/api/blogs', async (req, res) => {
     return res.status(400).json({ message: 'Datos incompletos' });
   }
   try {
-    await pool.query(
+    await db.query(
       'INSERT INTO Blog (ID_TipoBlog, ID_Usuario, Titulo, Fecha_Creacion, Contenido_Blog) VALUES (?, ?, ?, NOW(), ?)',
       [tipoBlog, req.session.user.id, titulo, contenido]
     );
@@ -183,6 +221,107 @@ router.post('/api/blogs', async (req, res) => {
   }
 });
 
+// Ruta DELETE para eliminar un blog del usuario autenticado
+router.delete('/api/blogs/:id', async (req, res) => {
+  const blogId = req.params.id;
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'No autenticado' });
+  }
+  try {
+    const [result] = await db.query(
+      'DELETE FROM Blog WHERE ID_Blog = ? AND ID_Usuario = ?',
+      [blogId, req.session.user.id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Blog no encontrado o no autorizado' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error en DELETE /api/blogs/:id:', error);
+    res.status(500).json({ success: false, message: 'Error al eliminar el blog' });
+  }
+});
+
+
+// Ruta PUT para editar un blog del usuario autenticado
+router.put('/api/blogs/:id', async (req, res) => {
+  const blogId = req.params.id;
+  const { titulo, contenido } = req.body;
+
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'No autenticado' });
+  }
+
+  if (!titulo || !contenido) {
+    return res.status(400).json({ success: false, message: 'Datos incompletos' });
+  }
+
+  try {
+    const [result] = await db.query(
+      'UPDATE Blog SET Titulo = ?, Contenido_Blog = ? WHERE ID_Blog = ? AND ID_Usuario = ?',
+      [titulo, contenido, blogId, req.session.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Blog no encontrado o no autorizado' });
+    }
+
+    res.json({ success: true, message: 'Blog actualizado correctamente' });
+  } catch (error) {
+    console.error('Error en PUT /api/blogs/:id:', error);
+    res.status(500).json({ success: false, message: 'Error al actualizar el blog' });
+  }
+});
+
+// Editar un blog existente
+router.put('/api/blogs/:id', async (req, res) => {
+  console.log('LOG: Accediendo a PUT /api/blogs/:id');
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'No autenticado' });
+  }
+
+  const blogId = req.params.id;
+  const { titulo, contenido } = req.body;
+
+  if (!titulo || !contenido) {
+    return res.status(400).json({ success: false, message: 'Datos incompletos' });
+  }
+
+  try {
+    // Verificar si el blog pertenece al usuario
+    const [result] = await db.query(
+      'UPDATE Blog SET Titulo = ?, Contenido_Blog = ? WHERE ID_Blog = ? AND ID_Usuario = ?',
+      [titulo, contenido, blogId, req.session.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(403).json({ success: false, message: 'No autorizado o blog no encontrado' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error en PUT /api/blogs/:id:', error);
+    res.status(500).json({ success: false, message: 'Error al actualizar el blog' });
+  }
+});
+
+
+// Obtener un blog específico por ID (para edición)
+router.get('/api/blogs/:id', async (req, res) => {
+  const blogId = req.params.id;
+  try {
+    const [rows] = await db.query('SELECT * FROM Blog WHERE ID_Blog = ?', [blogId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Blog no encontrado' });
+    }
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Error en GET /api/blogs/:id:', error);
+    res.status(500).json({ message: 'Error al obtener el blog' });
+  }
+});
+
+
 router.get('/api/comentarios', async (req, res) => {
   console.log('LOG: Accediendo a /api/comentarios', req.query);
   // ... tu código existente ...
@@ -191,7 +330,7 @@ router.get('/api/comentarios', async (req, res) => {
     return res.status(400).json({ message: 'ID de blog requerido' });
   }
   try {
-    const [comentarios] = await pool.query(`
+    const [comentarios] = await db.query(`
         SELECT c.*, u.Nombre_Usuario, u.Apellido_Usuario
         FROM Comentarios c
         JOIN Usuarios u ON c.ID_Usuario = u.ID_Usuario
@@ -216,7 +355,7 @@ router.post('/api/comentarios', async (req, res) => {
     return res.status(400).json({ message: 'Datos incompletos' });
   }
   try {
-    await pool.query(
+    await db.query(
       'INSERT INTO Comentarios (ID_Blog, ID_Usuario, Fecha_Comentario, Contenido_Comentario) VALUES (?, ?, NOW(), ?)',
       [blogId, req.session.user.id, contenido]
     );
@@ -249,7 +388,7 @@ router.post('/api/solicitar-admin', async (req, res) => {
     });
   }
   try {
-    const [result] = await pool.query(
+    const [result] = await db.query(
       'UPDATE Usuarios SET telefono = ?, Admin_Request = TRUE WHERE ID_Usuario = ?',
       [telefono, req.session.user.id]
     );
@@ -273,7 +412,7 @@ router.get('/api/admin-request-status', async (req, res) => {
     return res.status(401).json({ message: 'No autenticado' });
   }
   try {
-    const [rows] = await pool.query(
+    const [rows] = await db.query(
       'SELECT Admin_Request, Es_Admin FROM Usuarios WHERE ID_Usuario = ?',
       [req.session.user.id]
     );
@@ -299,7 +438,7 @@ router.get('/api/admin-request-status', async (req, res) => {
 router.get('/login-admin.html', (req, res) => {
   console.log('LOG: Sirviendo /login-admin.html');
   // Asumiendo que login-admin.html está en el mismo directorio que auth.js (raíz del proyecto)
-  res.sendFile(path.join(__dirname, 'login-admin.html'));
+  res.sendFile(path.join(__dirname, '../frontend/login-admin.html'));
 });
 
 // Procesar login de admin (JSON)
@@ -319,7 +458,7 @@ router.post('/api/admin-login', async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.query(
+    const [rows] = await db.query(
       'SELECT * FROM Usuarios WHERE Correo_Usuario = ? AND Es_Admin = 1', // Asegúrate que Es_Admin sea 1 para los admins
       [email]
     );
@@ -400,14 +539,14 @@ const isAdmin = (req, res, next) => {
 router.get('/dashboard-admin.html', isAdmin, (req, res) => {
   console.log('LOG: Sirviendo /dashboard-admin.html (protegido por isAdmin)');
   // Asumiendo que dashboard-admin.html está en el mismo directorio que auth.js (raíz del proyecto)
-  res.sendFile(path.join(__dirname, 'dashboard-admin.html'));
+  res.sendFile(path.join(__dirname, '../frontend/dashboard-admin.html'));
 });
 
 // RUTA PARA OBTENER SOLICITUDES DE ADMIN PENDIENTES
 router.get('/api/admin/solicitudes-pendientes', isAdmin, async (req, res) => {
   console.log('LOG: Accediendo a /api/admin/solicitudes-pendientes');
   try {
-    const [solicitudes] = await pool.query(
+    const [solicitudes] = await db.query(
       'SELECT ID_Usuario, Nombre_Usuario, Apellido_Usuario, telefono FROM Usuarios WHERE Admin_Request = TRUE AND Es_Admin = FALSE'
     );
     res.json(solicitudes);
@@ -428,7 +567,7 @@ router.post('/api/admin/aceptar-solicitud', isAdmin, async (req, res) => {
 
   try {
     // Actualizar el usuario a admin y resetear la solicitud
-    const [result] = await pool.query(
+    const [result] = await db.query(
       'UPDATE Usuarios SET Es_Admin = TRUE, Admin_Request = FALSE WHERE ID_Usuario = ?',
       [idUsuario]
     );
@@ -457,7 +596,7 @@ router.post('/api/admin/denegar-solicitud', isAdmin, async (req, res) => {
 
   try {
     // Resetear la solicitud y borrar el teléfono
-    const [result] = await pool.query(
+    const [result] = await db.query(
       'UPDATE Usuarios SET Admin_Request = FALSE, telefono = NULL WHERE ID_Usuario = ?',
       [idUsuario]
     );
@@ -478,7 +617,7 @@ router.post('/api/admin/denegar-solicitud', isAdmin, async (req, res) => {
 // También necesitarás una ruta para servir solicitudes.html, protegida por isAdmin
 router.get('/solicitudes.html', isAdmin, (req, res) => {
     console.log('LOG: Sirviendo /solicitudes.html (protegido por isAdmin)');
-    res.sendFile(path.join(__dirname, 'solicitudes.html'));
+    res.sendFile(path.join(__dirname, '../frontend/solicitudes.html'));
 });
 
 
@@ -525,7 +664,7 @@ router.get('/api/admin/reportes/actividades', isAdmin, async (req, res) => {
 
       querySQL += ' ORDER BY A.Fecha_Actividad DESC LIMIT 100'; // Limitar resultados por defecto
 
-      const [actividades] = await pool.query(querySQL, params);
+      const [actividades] = await db.query(querySQL, params);
       res.json(actividades);
 
   } catch (error) {
@@ -537,7 +676,7 @@ router.get('/api/admin/reportes/actividades', isAdmin, async (req, res) => {
 // Ruta para obtener los tipos de blog para el dropdown
 router.get('/api/tiposblog', async (req, res) => { // No necesita isAdmin si solo es para leer nombres
   try {
-      const [tipos] = await pool.query('SELECT ID_TipoBlog, Tipo_Blog FROM TipoBlog ORDER BY Tipo_Blog');
+      const [tipos] = await db.query('SELECT ID_TipoBlog, Tipo_Blog FROM TipoBlog ORDER BY Tipo_Blog');
       res.json(tipos);
   } catch (error) {
       console.error('Error al obtener tipos de blog:', error);
@@ -548,7 +687,7 @@ router.get('/api/tiposblog', async (req, res) => { // No necesita isAdmin si sol
 // Ruta para servir reportes.html (ya deberías tener una similar o crearla)
 router.get('/reportes.html', isAdmin, (req, res) => {
   console.log('LOG: Sirviendo /reportes.html (protegido por isAdmin)');
-  res.sendFile(path.join(__dirname, 'reportes.html')); // Ajusta la ruta si es necesario
+  res.sendFile(path.join(__dirname, '../frontend/reportes.html')); // Ajusta la ruta si es necesario
 });
 
 // RUTA PARA QUE ADMIN OBTENGA BLOGS (con filtros por tipo y término de búsqueda)
@@ -585,7 +724,7 @@ router.get('/api/admin/blogs', isAdmin, async (req, res) => {
       querySQL += ' ORDER BY B.Fecha_Creacion DESC LIMIT 200';
 
       console.log('SQL para Admin Blogs:', querySQL, params);
-      const [blogs] = await pool.query(querySQL, params);
+      const [blogs] = await db.query(querySQL, params);
       res.json(blogs);
 
   } catch (error) {
@@ -602,7 +741,7 @@ router.get('/api/admin/blog/:idBlogConComentarios', isAdmin, async (req, res) =>
       return res.status(400).json({ success: false, message: 'ID de Blog inválido.' });
   }
   try {
-      const [blogRows] = await pool.query(
+      const [blogRows] = await db.query(
           `SELECT B.ID_Blog, B.Titulo, B.Fecha_Creacion, B.Contenido_Blog, 
                   U.Nombre_Usuario, U.Apellido_Usuario, TB.Tipo_Blog 
            FROM Blog B 
@@ -616,7 +755,7 @@ router.get('/api/admin/blog/:idBlogConComentarios', isAdmin, async (req, res) =>
       }
       const blog = blogRows[0];
 
-      const [comentarios] = await pool.query(
+      const [comentarios] = await db.query(
           `SELECT C.ID_Comentario, C.Fecha_Comentario, C.Contenido_Comentario, 
                   U.Nombre_Usuario, U.Apellido_Usuario 
            FROM Comentarios C 
@@ -643,7 +782,7 @@ router.delete('/api/admin/blogs/:idBlog', isAdmin, async (req, res) => {
       return res.status(400).json({ success: false, message: 'ID de Blog inválido.' });
   }
   try {
-      const [deleteBlogResult] = await pool.query('DELETE FROM Blog WHERE ID_Blog = ?', [idBlog]);
+      const [deleteBlogResult] = await db.query('DELETE FROM Blog WHERE ID_Blog = ?', [idBlog]);
 
       if (deleteBlogResult.affectedRows === 0) {
           return res.status(404).json({ success: false, message: 'Blog no encontrado o ya eliminado.' });
@@ -666,7 +805,7 @@ router.delete('/api/admin/comentarios/:idComentario', isAdmin, async (req, res) 
       return res.status(400).json({ success: false, message: 'ID de Comentario inválido.' });
   }
   try {
-      const [result] = await pool.query('DELETE FROM Comentarios WHERE ID_Comentario = ?', [idComentario]);
+      const [result] = await db.query('DELETE FROM Comentarios WHERE ID_Comentario = ?', [idComentario]);
 
       if (result.affectedRows === 0) {
           return res.status(404).json({ success: false, message: 'Comentario no encontrado o ya eliminado.' });
@@ -681,7 +820,51 @@ router.delete('/api/admin/comentarios/:idComentario', isAdmin, async (req, res) 
 // RUTA PARA SERVIR EL HTML DE MANEJO DE BLOGS (protegida por isAdmin)
 router.get('/manejarBlogs.html', isAdmin, (req, res) => {
   console.log('LOG AUTH.JS: Sirviendo /manejarBlogs.html (protegido por isAdmin)');
-  res.sendFile(path.join(__dirname, 'manejarBlogs.html'));
+  res.sendFile(path.join(__dirname, '../frontend/manejarBlogs.html'));
+});
+
+// Ruta para obtener los blogs del usuario autenticado
+router.get('/api/mis-blogs', async (req, res) => {
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Usuario no autenticado' });
+  }
+
+  try {
+    const [blogs] = await db.execute(
+      'SELECT * FROM Blog WHERE ID_Usuario = ? ORDER BY Fecha_Creacion DESC',
+      [userId]
+    );
+    res.json({ success: true, blogs });
+  } catch (error) {
+    console.error('Error al obtener los blogs del usuario:', error);
+    res.status(500).json({ success: false, message: 'Error al cargar los blogs' });
+  }
+});
+
+router.delete('/api/blogs/:id', async (req, res) => {
+  const blogId = req.params.id;
+
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'No autenticado' });
+  }
+
+  try {
+    const [result] = await db.query(
+      'DELETE FROM Blog WHERE ID_Blog = ? AND ID_Usuario = ?',
+      [blogId, req.session.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Blog no encontrado o no autorizado' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error al eliminar blog:', error);
+    res.status(500).json({ success: false, message: 'Error al eliminar blog' });
+  }
 });
 
 module.exports = router;

@@ -4,13 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BLOGY - Inicio</title>
-  <link rel="stylesheet" href="home.css" />
+  <link rel="stylesheet" href="styles/home.css" />
 </head>
 <body>
   <header class="header">
-    <div class="logo">BLOGY</div>
-    <a href="home.html" class="blog-button">Mis Blogs</a>
+    <div class="logo">
+      <img src="/images/logo.png" alt="Logo BLOGY" class="logo-img-header">
     </div>
+    <a href="misblogs.html" class="blog-button">Mis Blogs</a>
     <div class="user-icon" onclick="mostrarUserPopup()">
       <img src="images/user.png" alt="Usuario">
     </div>
@@ -41,39 +42,18 @@
       </div>
       <div class="body">
         <div id="adminStatusMessage" style="margin-bottom: 1rem; color: #e91e63; font-weight: bold; display: none;"></div>
-        
-        <div class="terms-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; background: white; border-radius: 8px;">
+
+        <div class="terms-container">
           <h3>Políticas de Privacidad</h3>
           <p><strong>Última actualización: 01/01/2025</strong></p>
-          
           <h4>1. Información que recopilamos</h4>
           <p>Recopilamos información que nos proporcionas directamente, como tu nombre, dirección de correo electrónico, número de teléfono y cualquier otra información que elijas proporcionar.</p>
-          
           <h4>2. Uso de la información</h4>
-          <p>Utilizamos la información que recopilamos para:</p>
-          <ul>
-            <li>Proveer, operar y mantener nuestro servicio</li>
-            <li>Mejorar, personalizar y expandir nuestro servicio</li>
-            <li>Comprender y analizar cómo utilizas nuestro servicio</li>
-            <li>Desarrollar nuevos productos, servicios, características y funcionalidades</li>
-            <li>Comunicarnos contigo, ya sea directamente o a través de nuestros socios</li>
-          </ul>
-          
+          <p>Utilizamos la información que recopilamos para operar, mejorar y mantener nuestros servicios.</p>
           <h4>3. Compartir información</h4>
-          <p>No compartimos información personal con terceros excepto en los siguientes casos:</p>
-          <ul>
-            <li>Con proveedores de servicios que nos ayudan a operar nuestro servicio</li>
-            <li>Para cumplir con requisitos legales</li>
-            <li>Para proteger los derechos y la seguridad de BLOGY y nuestros usuarios</li>
-          </ul>
-          
-          <h4>4. Seguridad de los datos</h4>
-          <p>Implementamos medidas de seguridad para proteger tu información personal, pero ninguna transmisión por Internet o método de almacenamiento electrónico es 100% seguro.</p>
-          
-          <h4>5. Tus derechos</h4>
-          <p>Tienes derecho a acceder, corregir o eliminar tu información personal. Puedes hacerlo a través de tu cuenta o contactándonos directamente.</p>
+          <p>No compartimos información personal con terceros excepto para operar el sitio o cumplir con la ley.</p>
         </div>
-        
+
         <div class="toggle-group">
           <span>Acepto la política de privacidad</span>
           <label class="switch">
@@ -81,7 +61,7 @@
             <span class="slider"></span>
           </label>
         </div>
-        
+
         <div class="toggle-group">
           <span>Acepto mantener la integridad de la comunidad</span>
           <label class="switch">
@@ -89,7 +69,7 @@
             <span class="slider"></span>
           </label>
         </div>
-        
+
         <p>Teléfono (se te contactará para completar el proceso)</p>
         <input type="tel" id="telefonoAdmin" placeholder="Tu número de celular">
         <button id="enviarSolicitudBtn">Enviar Solicitud</button>
@@ -110,6 +90,6 @@
     </div>
   </div>
 
-  <script src="home.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>
