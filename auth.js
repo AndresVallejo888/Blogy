@@ -62,44 +62,33 @@ router.post('/registro', async (req, res) => {
 router.post('/login', async (req, res) => {
   console.log('LOG: Accediendo a /login');
   const { email, password } = req.body;
-
   try {
-    const [rows] = await pool.query('SELECT * FROM Usuarios WHERE Correo_Usuario = ?', [email]);
+    // Importante seleccionar Es_Owner
+    const [rows] = await pool.query('SELECT ID_Usuario, Nombre_Usuario, Apellido_Usuario, Correo_Usuario, Password_Usuario, Es_Admin, Es_Owner FROM Usuarios WHERE Correo_Usuario = ?', [email]);
     if (rows.length === 0) {
-      console.log('LOG: /login - Usuario no encontrado:', email);
-      return res.status(400).json({
-        success: false,
-        message: 'Credenciales incorrectas'
-      });
+      return res.status(400).json({ success: false, message: 'Credenciales incorrectas' });
     }
-
     const user = rows[0];
     const isMatch = await bcrypt.compare(password, user.Password_Usuario);
     if (!isMatch) {
-      console.log('LOG: /login - Contraseña incorrecta para:', email);
-      return res.status(400).json({
-        success: false,
-        message: 'Credenciales incorrectas'
-      });
+      return res.status(400).json({ success: false, message: 'Credenciales incorrectas' });
     }
-
     req.session.user = {
       id: user.ID_Usuario,
       nombre: user.Nombre_Usuario,
       apellido: user.Apellido_Usuario,
       email: user.Correo_Usuario,
-      isAdmin: user.Es_Admin // Asegúrate que Es_Admin (0 o 1) se cargue aquí
+      isAdmin: user.Es_Admin === 1, // Convertir a booleano si es necesario
+      isOwner: user.Es_Owner === 1   // AÑADIDO: Cargar Es_Owner a la sesión
     };
-    console.log('LOG: /login - Login de usuario exitoso:', email, 'isAdmin:', user.Es_Admin);
-    res.json({ success: true, isAdmin: user.Es_Admin === 1 }); // Puedes enviar isAdmin al frontend si lo necesitas
+    console.log('LOG: /login - Login de usuario exitoso:', email, 'isAdmin:', req.session.user.isAdmin, 'isOwner:', req.session.user.isOwner);
+    res.json({ success: true, isAdmin: req.session.user.isAdmin, isOwner: req.session.user.isOwner });
   } catch (error) {
     console.error('Error en /login:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error en el servidor'
-    });
+    res.status(500).json({ success: false, message: 'Error en el servidor' });
   }
 });
+
 
 // Logout
 router.get('/logout', (req, res) => {
@@ -124,11 +113,11 @@ router.get('/logout', (req, res) => {
 router.get('/api/usuario-actual', (req, res) => {
   console.log('LOG: Accediendo a /api/usuario-actual');
   if (!req.session.user) {
-    console.log('LOG: /api/usuario-actual - No autenticado (sin sesión)');
     return res.status(401).json({ message: 'No autenticado' });
   }
+  // req.session.user ya debería tener isAdmin e isOwner cargados desde el login
   console.log('LOG: /api/usuario-actual - Usuario en sesión:', req.session.user);
-  res.json(req.session.user); // Esto enviará el objeto de usuario, incluyendo isAdmin
+  res.json(req.session.user);
 });
 
 // --- RUTAS DE BLOGS Y COMENTARIOS (sin cambios mayores, solo logs de ejemplo) ---
@@ -320,7 +309,7 @@ router.post('/api/admin-login', async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM Usuarios WHERE Correo_Usuario = ? AND Es_Admin = 1', // Asegúrate que Es_Admin sea 1 para los admins
+      'SELECT ID_Usuario, Nombre_Usuario, Apellido_Usuario, Correo_Usuario, Password_Usuario, Es_Admin, Es_Owner FROM Usuarios WHERE Correo_Usuario = ? AND Es_Admin = TRUE',
       [email]
     );
 
@@ -358,9 +347,10 @@ router.post('/api/admin-login', async (req, res) => {
       nombre: user.Nombre_Usuario,
       apellido: user.Apellido_Usuario,
       email: user.Correo_Usuario,
-      isAdmin: true // ¡IMPORTANTE: Establecer isAdmin a true explícitamente!
+      isAdmin: true, // ¡IMPORTANTE: Establecer isAdmin a true explícitamente!
+      isOwner: user.Es_Owner === 1 // AÑADIDO: Cargar Es_Owner a la sesión
     };
-    console.log('LOG: /api/admin-login - Login de ADMIN exitoso para:', email);
+    console.log('LOG: /api/admin-login - Login de ADMIN exitoso:', email, 'isOwner:', req.session.user.isOwner);
     res.json({
       success: true,
       user: { // Puedes enviar la info del usuario si la necesitas en el frontend después del login
@@ -388,13 +378,27 @@ const isAdmin = (req, res, next) => {
     return next();
   }
   console.log('LOG: Middleware isAdmin - Acceso DENEGADO. Redirigiendo a /login-admin.html');
-  // Si no es admin o no hay sesión, podría redirigir o enviar error.
-  // Para proteger una página HTML, la redirección es común.
-  // Para una API, un 403 es más apropiado.
-  // Como esto protege '/dashboard-admin.html', redirigir está bien.
-  // Si fuera una API protegida, sería: res.status(403).json({ message: 'Acceso no autorizado' });
   res.redirect('/login-admin.html');
 };
+
+const isOwner = (req, res, next) => {
+  console.log('LOG: Middleware isOwner - Verificando sesión:', req.session.user);
+  // Un Owner debe ser también Admin
+  if (req.session.user && req.session.user.isAdmin === true && req.session.user.isOwner === true) {
+      console.log('LOG: Middleware isOwner - Acceso permitido');
+      return next();
+  }
+  console.log('LOG: Middleware isOwner - Acceso DENEGADO.');
+  // Si intentan acceder a una página HTML protegida por Owner, redirigir al dashboard de admin.
+  // Si es una API, enviar un error 403.
+  if (req.accepts('html')) {
+      // Podrías añadir un query param para mostrar un mensaje en el dashboard
+      return res.redirect('/dashboard-admin.html?error=no_owner_permission');
+  }
+  res.status(403).json({ success: false, message: 'Acceso denegado. Permisos de Owner requeridos.' });
+};
+
+
 
 // Ruta protegida para dashboard de admin (HTML)
 router.get('/dashboard-admin.html', isAdmin, (req, res) => {
@@ -404,7 +408,7 @@ router.get('/dashboard-admin.html', isAdmin, (req, res) => {
 });
 
 // RUTA PARA OBTENER SOLICITUDES DE ADMIN PENDIENTES
-router.get('/api/admin/solicitudes-pendientes', isAdmin, async (req, res) => {
+router.get('/api/admin/solicitudes-pendientes', isAdmin, isOwner, async (req, res) => {
   console.log('LOG: Accediendo a /api/admin/solicitudes-pendientes');
   try {
     const [solicitudes] = await pool.query(
@@ -418,7 +422,7 @@ router.get('/api/admin/solicitudes-pendientes', isAdmin, async (req, res) => {
 });
 
 // RUTA PARA ACEPTAR UNA SOLICITUD DE ADMIN
-router.post('/api/admin/aceptar-solicitud', isAdmin, async (req, res) => {
+router.post('/api/admin/aceptar-solicitud', isAdmin, isOwner, async (req, res) => {
   const { idUsuario } = req.body; // Esperamos que el frontend envíe el ID del usuario
   console.log(`LOG: Accediendo a /api/admin/aceptar-solicitud para ID_Usuario: ${idUsuario}`);
 
@@ -447,7 +451,7 @@ router.post('/api/admin/aceptar-solicitud', isAdmin, async (req, res) => {
 });
 
 // RUTA PARA DENEGAR UNA SOLICITUD DE ADMIN
-router.post('/api/admin/denegar-solicitud', isAdmin, async (req, res) => {
+router.post('/api/admin/denegar-solicitud', isAdmin, isOwner, async (req, res) => {
   const { idUsuario } = req.body; // Esperamos que el frontend envíe el ID del usuario
   console.log(`LOG: Accediendo a /api/admin/denegar-solicitud para ID_Usuario: ${idUsuario}`);
 
@@ -476,7 +480,7 @@ router.post('/api/admin/denegar-solicitud', isAdmin, async (req, res) => {
 });
 
 // También necesitarás una ruta para servir solicitudes.html, protegida por isAdmin
-router.get('/solicitudes.html', isAdmin, (req, res) => {
+router.get('/solicitudes.html', isAdmin, isOwner, (req, res) => {
     console.log('LOG: Sirviendo /solicitudes.html (protegido por isAdmin)');
     res.sendFile(path.join(__dirname, 'solicitudes.html'));
 });
@@ -684,4 +688,32 @@ router.get('/manejarBlogs.html', isAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, 'manejarBlogs.html'));
 });
 
+// RUTA PARA OBTENER ESTADÍSTICAS DE USUARIOS Y LISTA DE ADMINS
+router.get('/api/admin/estadisticas-usuarios', isAdmin, async (req, res) => {
+  console.log('LOG AUTH.JS: Accediendo a /api/admin/estadisticas-usuarios');
+  try {
+      const [totalUsuariosResult] = await pool.query('SELECT COUNT(*) as total FROM Usuarios');
+      const totalUsuarios = totalUsuariosResult[0].total;
+
+      const [totalAdminsResult] = await pool.query('SELECT COUNT(*) as total FROM Usuarios WHERE Es_Admin = TRUE');
+      const totalAdmins = totalAdminsResult[0].total;
+
+      const [listaAdmins] = await pool.query(
+          'SELECT ID_Usuario, Nombre_Usuario, Apellido_Usuario, Correo_Usuario FROM Usuarios WHERE Es_Admin = TRUE ORDER BY Nombre_Usuario, Apellido_Usuario'
+      );
+
+      res.json({
+          success: true,
+          totalUsuarios,
+          totalAdmins,
+          listaAdmins
+      });
+
+  } catch (error) {
+      console.error('Error en /api/admin/estadisticas-usuarios:', error);
+      res.status(500).json({ success: false, message: 'Error al obtener estadísticas de usuarios.' });
+  }
+});
+
 module.exports = router;
+// SECCION MIS BLOGS --------------------------------------------------------------------------------------------------------------------
