@@ -20,6 +20,7 @@ create table Usuarios (
     Nombre_Usuario varchar (100) not null,
     Apellido_Usuario varchar (100) not null,
     Es_Admin boolean default false,
+    Es_Owner boolean default false,
     Admin_Request boolean default false,
     Correo_Usuario varchar (100) unique not null,
     Password_Usuario varchar(100) not null,
