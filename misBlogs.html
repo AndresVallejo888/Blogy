@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mis Blogs - BLOGY</title>
+    <link rel="stylesheet" href="misBlogs.css" /> <link rel="stylesheet" href="styles.css"> </head>
+<body>
+    <header class="header"> <div class="header-content-misblogs"> <a href="home.html" class="back-arrow-misblogs">← Volver a Inicio</a>
+            <div class="logo-misblogs">BLOGY</div>
+            <div class="user-icon-misblogs" onclick="toggleUserPopupMisBlogs()">
+                <img src="images/user.png" alt="Usuario" id="userIconMisBlogs">
+            </div>
+        </div>
+    </header>
+
+    <div class="popup" id="popupUserMisBlogs" style="display:none;">
+        <div class="popup-user-content">
+            <div class="popup-user-header">
+                Hola <span id="nombreUsuarioMisBlogs">Cargando...</span>
+                <button class="close-popup" onclick="cerrarUserPopupMisBlogs()">&times;</button>
+            </div>
+            <div class="popup-user-body">
+                <button onclick="cerrarSesionMisBlogs()">Cerrar sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="mis-blogs-container">
+        <h1>Mis Publicaciones</h1>
+        <div class="filtros-mis-blogs">
+            <input type="text" id="searchMisBlogsInput" placeholder="Buscar por título en mis blogs...">
+            <button id="btnBuscarMisBlogs" class="btn-accion">Buscar</button>
+        </div>
+
+        <div id="listaMisBlogs" class="lista-blogs-usuario">
+            <p id="loadingMisBlogsMessage" class="status-message">Cargando tus blogs...</p>
+            </div>
+    </main>
+
+    <div id="editBlogModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content-edit-blog">
+            <span class="modal-close-btn" onclick="cerrarEditModal()">&times;</span>
+            <h2>Editar Blog</h2>
+            <form id="editBlogForm">
+                <input type="hidden" id="editBlogId">
+                <div class="form-group-edit">
+                    <label for="editBlogTitulo">Título:</label>
+                    <input type="text" id="editBlogTitulo" required>
+                </div>
+                <div class="form-group-edit">
+                    <label for="editBlogTipo">Sección:</label>
+                    <select id="editBlogTipo" required>
+                        </select>
+                </div>
+                <div class="form-group-edit">
+                    <label for="editBlogContenido">Contenido:</label>
+                    <textarea id="editBlogContenido" rows="10" required></textarea>
+                </div>
+                <div class="form-actions-edit">
+                    <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                    <button type="button" class="btn-cancelar" onclick="cerrarEditModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="customPopup" class="custom-popup-overlay" style="display: none;">
+        <div class="custom-popup-content">
+            <p id="customPopupMessage"></p>
+            <button id="customPopupOkButton">OK</button>
+        </div>
+    </div>
+
+
+    <script src="misBlogs.js"></script>
+</body>
+</html>

@@ -715,5 +715,163 @@ router.get('/api/admin/estadisticas-usuarios', isAdmin, async (req, res) => {
   }
 });
 
+//------------MIS BLOGS---------------------------------------------------------------------------------------
+const isUserAuthenticated = (req, res, next) => {
+    if (req.session.user && req.session.user.id) {
+        return next();
+    }
+    // Si no está autenticado, podría redirigir a login.html o enviar un error
+    if (req.accepts('html')) {
+        return res.redirect('/login.html?mensaje=requiere_sesion');
+    }
+    res.status(401).json({ success: false, message: 'Acceso no autorizado. Por favor, inicia sesión.' });
+};
+
+// RUTA PARA OBTENER LOS BLOGS DEL USUARIO ACTUAL (con filtro por título)
+router.get('/api/mis-blogs', isUserAuthenticated, async (req, res) => {
+    const idUsuarioActual = req.session.user.id;
+    const { searchTerm } = req.query;
+    console.log(`LOG AUTH.JS: Accediendo a /api/mis-blogs para usuario ${idUsuarioActual} con searchTerm: ${searchTerm}`);
+
+    try {
+        let querySQL = `
+            SELECT 
+                B.ID_Blog, B.Titulo, B.Fecha_Creacion, B.Fecha_Update, TB.Tipo_Blog
+            FROM Blog B
+            JOIN TipoBlog TB ON B.ID_TipoBlog = TB.ID_TipoBlog
+            WHERE B.ID_Usuario = ?
+        `;
+        const params = [idUsuarioActual];
+
+        if (searchTerm && searchTerm.trim() !== '') {
+            querySQL += ' AND B.Titulo LIKE ?';
+            params.push(`%${searchTerm.trim()}%`);
+        }
+        querySQL += ' ORDER BY B.Fecha_Creacion DESC';
+
+        const [blogs] = await pool.query(querySQL, params);
+        res.json(blogs);
+    } catch (error) {
+        console.error('Error en /api/mis-blogs:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener tus blogs.' });
+    }
+});
+
+// RUTA PARA OBTENER UN BLOG ESPECÍFICO DEL USUARIO PARA EDICIÓN
+router.get('/api/mi-blog/:idBlog', isUserAuthenticated, async (req, res) => {
+    const { idBlog } = req.params;
+    const idUsuarioActual = req.session.user.id;
+    console.log(`LOG AUTH.JS: Usuario ${idUsuarioActual} obteniendo su blog ${idBlog} para editar`);
+
+    if (isNaN(parseInt(idBlog))) {
+        return res.status(400).json({ success: false, message: 'ID de Blog inválido.' });
+    }
+
+    try {
+        const [blogRows] = await pool.query(
+            `SELECT ID_Blog, Titulo, Contenido_Blog, ID_TipoBlog 
+             FROM Blog 
+             WHERE ID_Blog = ? AND ID_Usuario = ?`, // Asegura que el blog pertenezca al usuario
+            [idBlog, idUsuarioActual]
+        );
+
+        if (blogRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Blog no encontrado o no tienes permiso para editarlo.' });
+        }
+        res.json(blogRows[0]);
+    } catch (error) {
+        console.error(`Error obteniendo blog ${idBlog} para usuario ${idUsuarioActual}:`, error);
+        res.status(500).json({ success: false, message: 'Error al obtener los datos del blog.' });
+    }
+});
+// RUTA PARA ACTUALIZAR UN BLOG DEL USUARIO ACTUAL
+router.put('/api/mi-blog/:idBlog', isUserAuthenticated, async (req, res) => {
+    const { idBlog } = req.params;
+    const idUsuarioActual = req.session.user.id;
+    const { titulo, contenido, tipoBlog } = req.body; // ID_TipoBlog se envía como tipoBlog
+    console.log(`LOG AUTH.JS: Usuario ${idUsuarioActual} actualizando su blog ${idBlog}`);
+
+    if (isNaN(parseInt(idBlog))) {
+        return res.status(400).json({ success: false, message: 'ID de Blog inválido.' });
+    }
+    if (!titulo || !contenido || !tipoBlog) {
+        return res.status(400).json({ success: false, message: 'Título, contenido y tipo de blog son requeridos.' });
+    }
+
+    try {
+        // Primero, verificar que el blog pertenece al usuario actual
+        const [blogOwnerRows] = await pool.query('SELECT ID_Usuario FROM Blog WHERE ID_Blog = ?', [idBlog]);
+        if (blogOwnerRows.length === 0 || blogOwnerRows[0].ID_Usuario !== idUsuarioActual) {
+            return res.status(403).json({ success: false, message: 'No tienes permiso para editar este blog.' });
+        }
+
+        // Actualizar el blog
+        const [result] = await pool.query(
+            'UPDATE Blog SET Titulo = ?, Contenido_Blog = ?, ID_TipoBlog = ?, Fecha_Update = NOW() WHERE ID_Blog = ? AND ID_Usuario = ?',
+            [titulo, contenido, tipoBlog, idBlog, idUsuarioActual]
+        );
+
+        if (result.affectedRows === 0) {
+            // Esto no debería pasar si la verificación anterior fue exitosa, pero es una salvaguarda
+            return res.status(404).json({ success: false, message: 'Blog no encontrado o no se pudo actualizar.' });
+        }
+        // El trigger `after_update_blog` registrará la actividad.
+        res.json({ success: true, message: 'Blog actualizado con éxito.' });
+    } catch (error) {
+        console.error(`Error actualizando blog ${idBlog} para usuario ${idUsuarioActual}:`, error);
+        res.status(500).json({ success: false, message: 'Error al actualizar el blog.' });
+    }
+});
+
+// RUTA PARA ELIMINAR UN BLOG DEL USUARIO ACTUAL (O ADMIN)
+router.delete('/api/mi-blog/:idBlog', isUserAuthenticated, async (req, res) => {
+    const { idBlog } = req.params;
+    const idUsuarioActual = req.session.user.id;
+    const esAdmin = req.session.user.isAdmin; // Verificar si el que elimina es admin
+
+    console.log(`LOG AUTH.JS: Usuario ${idUsuarioActual} (admin: ${esAdmin}) intentando eliminar blog ${idBlog}`);
+
+    if (isNaN(parseInt(idBlog))) {
+        return res.status(400).json({ success: false, message: 'ID de Blog inválido.' });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Verificar propiedad si no es admin
+        if (!esAdmin) {
+            const [blogOwnerRows] = await connection.query('SELECT ID_Usuario FROM Blog WHERE ID_Blog = ?', [idBlog]);
+            if (blogOwnerRows.length === 0 || blogOwnerRows[0].ID_Usuario !== idUsuarioActual) {
+                await connection.rollback();
+                return res.status(403).json({ success: false, message: 'No tienes permiso para eliminar este blog.' });
+            }
+        }
+        
+        // Asumimos ON DELETE CASCADE para los comentarios en la BD.
+        const [deleteBlogResult] = await connection.query('DELETE FROM Blog WHERE ID_Blog = ?', [idBlog]);
+
+        if (deleteBlogResult.affectedRows === 0) {
+            await connection.rollback();
+            return res.status(404).json({ success: false, message: 'Blog no encontrado o ya eliminado.' });
+        }
+        
+        await connection.commit();
+        res.json({ success: true, message: `Blog ID: ${idBlog} y sus comentarios asociados fueron eliminados.` });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error(`Error eliminando blog ${idBlog}:`, error);
+        res.status(500).json({ success: false, message: 'Error al eliminar el blog.' });
+    } finally {
+        if (connection) connection.release();
+    }
+});
+
+// Ruta para servir el HTML de misBlogs.html (protegida para usuarios logueados)
+router.get('/misBlogs.html', isUserAuthenticated, (req, res) => {
+    console.log('LOG AUTH.JS: Sirviendo /misBlogs.html');
+    res.sendFile(path.join(__dirname, 'misBlogs.html'));
+});
+
 module.exports = router;
-// SECCION MIS BLOGS --------------------------------------------------------------------------------------------------------------------

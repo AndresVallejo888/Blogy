@@ -1,0 +1,351 @@
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #fdf7f3;
+  color: #333;
+}
+
+/* --- Estilos del Header (copia de reportes.css o de tu common-styles.css) --- */
+.header { /* Asumiendo que usas la clase .header como en home.html */
+    background: linear-gradient(to right, #ff7eb3, #ff758c);
+    padding: 15px 30px; /* Más padding */
+    display: flex;
+    align-items: center;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.header-content-misblogs { /* Específico si el layout es diferente */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.logo-misblogs { /* Si es diferente al global */
+    font-size: 1.8em;
+    font-weight: bold;
+    /* flex-grow: 1; */ /* Para empujar el user-icon a la derecha si es necesario */
+}
+.back-arrow-misblogs {
+    font-size: 1.2em; /* Ajusta según tu preferencia */
+    text-decoration: none;
+    color: #fff;
+    margin-right: 20px;
+    font-weight: bold;
+}
+.back-arrow-misblogs:hover { text-decoration: underline; }
+
+.user-icon-misblogs img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+}
+/* Estilos para el popup de usuario (popupUserMisBlogs) - puedes reutilizar de home.css o common-styles.css */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none; /* Cambiado por JS a flex */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.popup-user-content { /* Para el popup de usuario */
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    min-width: 250px;
+    text-align: left;
+}
+.popup-user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+.popup-user-header span { font-weight: bold; }
+.close-popup { background: none; border: none; font-size: 1.5em; cursor: pointer; color: #888; }
+.close-popup:hover { color: #333; }
+.popup-user-body button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #e05c7d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+.popup-user-body button:hover { background-color: #c74b68; }
+
+
+/* --- Contenedor Principal --- */
+.mis-blogs-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 25px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.mis-blogs-container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 1.7em;
+}
+
+/* --- Filtros --- */
+.filtros-mis-blogs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  align-items: flex-end; /* Alinear items en la base */
+}
+.filtros-mis-blogs input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+  flex-grow: 1; /* El input de búsqueda ocupa el espacio disponible */
+}
+.filtros-mis-blogs .btn-accion { /* Para el botón "Buscar" */
+  padding: 10px 18px;
+  background-color: #e05c7d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.filtros-mis-blogs .btn-accion:hover { background-color: #c74b68; }
+
+/* --- Lista de Blogs del Usuario --- */
+.lista-blogs-usuario {
+  list-style: none;
+  padding: 0;
+}
+.mi-blog-item {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mi-blog-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.25em;
+  color: #333;
+}
+.mi-blog-info p {
+  margin: 3px 0;
+  font-size: 0.9em;
+  color: #555;
+}
+.mi-blog-info small {
+  font-size: 0.8em;
+  color: #777;
+}
+.mi-blog-acciones button {
+  margin-left: 10px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+.btn-editar-mi-blog { background-color: #5bc0de; color: white; }
+.btn-editar-mi-blog:hover { background-color: #46b8da; }
+.btn-eliminar-mi-blog { background-color: #d9534f; color: white; }
+.btn-eliminar-mi-blog:hover { background-color: #c9302c; }
+
+/* --- Modal de Edición --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; /* Encima de otros popups si es necesario */
+  padding: 15px;
+  box-sizing: border-box;
+}
+.modal-content-edit-blog {
+  background-color: #fff;
+  padding: 20px 25px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.modal-content-edit-blog h2 { margin-top: 0; }
+.modal-close-btn { /* Reutiliza el estilo de otros popups */
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.8em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+}
+.modal-close-btn:hover { color: #333; }
+
+.form-group-edit { margin-bottom: 15px; }
+.form-group-edit label { display: block; margin-bottom: 5px; font-weight: 600; }
+.form-group-edit input[type="text"],
+.form-group-edit select,
+.form-group-edit textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Importante para que el padding no aumente el ancho */
+  font-size: 1em;
+}
+.form-group-edit textarea { resize: vertical; min-height: 120px; }
+.form-actions-edit { margin-top: 20px; text-align: right; }
+.form-actions-edit button {
+  padding: 10px 18px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 10px;
+}
+.btn-guardar { background-color: #5cb85c; color: white; }
+.btn-guardar:hover { background-color: #4cae4c; }
+.btn-cancelar { background-color: #aaa; color: white; }
+.btn-cancelar:hover { background-color: #888; }
+
+.status-message {
+  text-align: center;
+  padding: 25px; /* Más padding para destacar el mensaje */
+  color: #6c757d; /* Un gris estándar para texto informativo */
+  font-style: italic;
+  font-size: 1.05em; /* Ligeramente más grande */
+  background-color: #f8f9fa; /* Un fondo muy ligero para separar visualmente */
+  border-radius: 8px; /* Bordes redondeados */
+  margin-top: 20px; /* Espacio si está después de otros elementos */
+  margin-bottom: 20px; /* Espacio si está antes de otros elementos */
+  border: 1px solid #e9ecef; /* Borde sutil */
+}
+
+.status-message.error { /* Estilo específico para mensajes de error */
+  color: #721c24; /* Rojo oscuro para el texto del error */
+  background-color: #f8d7da; /* Fondo rosado claro para errores */
+  border-color: #f5c6cb; /* Borde rosado más oscuro */
+  font-style: normal; /* El error no necesita ser itálico */
+  font-weight: 500; /* Un poco más de peso para destacar */
+}
+
+
+/* --- ESTILOS PARA EL POP-UP DE NOTIFICACIÓN PERSONALIZADO --- */
+.custom-popup-overlay {
+  position: fixed; /* Se queda fijo en la pantalla */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Fondo semitransparente oscuro */
+  display: flex; /* Usar flex para centrar el contenido del pop-up */
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Asegura que esté por encima de todo */
+  opacity: 0; /* Inicialmente invisible para la animación */
+  visibility: hidden; /* Inicialmente no visible y no interactuable */
+  /* Transición para la opacidad y visibilidad */
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s; 
+}
+
+/* Cuando el pop-up se muestra (cuando tiene display: flex vía JS) */
+.custom-popup-overlay[style*="display: flex"] {
+  opacity: 1;
+  visibility: visible;
+  /* Ajustar la transición de visibilidad para que coincida con la opacidad */
+  transition: opacity 0.3s ease, visibility 0s linear 0s; 
+}
+
+.custom-popup-content {
+  background-color: #fff;
+  padding: 30px 35px; /* Más padding para un look más espaciado */
+  border-radius: 10px; /* Bordes más redondeados */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); /* Sombra más definida para destacar */
+  text-align: center;
+  min-width: 320px; /* Ancho mínimo del pop-up */
+  max-width: 480px; /* Ancho máximo, ajusta según necesidad */
+  transform: scale(0.9); /* Estado inicial para animación de escala */
+  /* Transición con un efecto de rebote sutil */
+  transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+}
+
+/* Estado final de la animación de escala cuando el pop-up se muestra */
+.custom-popup-overlay[style*="display: flex"] .custom-popup-content {
+  transform: scale(1);
+}
+
+.custom-popup-content p { /* Estilo para el mensaje dentro del pop-up */
+  margin-top: 0;
+  margin-bottom: 25px; /* Buen espacio antes del botón */
+  font-size: 1.15em; /* Texto del mensaje un poco más grande */
+  color: #333;
+  line-height: 1.6; /* Mejor interlineado para legibilidad */
+}
+
+.custom-popup-content button { /* Estilo para el botón "OK" del pop-up */
+  background-color: #e05c7d; /* Color principal del tema (rosado) */
+  color: white;
+  border: none;
+  padding: 12px 30px; /* Botón más grande y clickeable */
+  border-radius: 6px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-weight: 500; /* Un poco de peso a la fuente del botón */
+}
+
+.custom-popup-content button:hover {
+  background-color: #c74b68; /* Color más oscuro al pasar el mouse */
+}
+
+/* Clases de Tipo para el Pop-up (éxito y error) */
+.custom-popup-content.success p {
+  color: #155724; /* Verde oscuro para texto de éxito */
+  /* Podrías añadir un icono de checkmark aquí con ::before si quieres */
+}
+.custom-popup-content.success button {
+  background-color: #28a745; /* Verde para botón de éxito */
+}
+.custom-popup-content.success button:hover {
+  background-color: #218838; /* Verde más oscuro al pasar el mouse */
+}
+
+.custom-popup-content.error p {
+  color: #721c24; /* Rojo oscuro para texto de error */
+  /* Podrías añadir un icono de error aquí con ::before si quieres */
+}
+.custom-popup-content.error button {
+  background-color: #dc3545; /* Rojo para botón de error */
+}
+.custom-popup-content.error button:hover {
+  background-color: #c82333; /* Rojo más oscuro al pasar el mouse */
+} 
