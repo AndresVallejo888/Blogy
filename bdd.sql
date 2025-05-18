@@ -54,15 +54,15 @@ create table Comentarios(
     CONSTRAINT fk_comentarios_usuario FOREIGN KEY (ID_Usuario) REFERENCES Usuarios(ID_Usuario)
 );
 
-DROP TABLE IF EXISTS Actividades; -- Borrar si ya existe para recrearla con cambios
+DROP TABLE IF EXISTS Actividades; 
 CREATE TABLE Actividades (
     ID_Actividad INT AUTO_INCREMENT,
-    ID_Usuario INT NOT NULL,             -- Quién realizó la acción
-    Tipo_Accion VARCHAR(50) NOT NULL,    -- 'CREAR_BLOG', 'EDITAR_BLOG', 'ELIMINAR_BLOG', 'CREAR_COMENTARIO', 'ELIMINAR_COMENTARIO', 'REGISTRO_USUARIO', 'PROMOVER_USUARIO'
-    Entidad_Afectada VARCHAR(50) NOT NULL, -- 'BLOG', 'COMENTARIO', 'USUARIO'
-    ID_Entidad_Afectada INT NULL,        -- ID del blog, comentario o usuario afectado. Puede ser NULL si no aplica directamente (ej. un login fallido, si lo registraras)
-    ID_TipoBlog_Afectado INT NULL,       -- Para acciones sobre BLOGS, registrar a qué TipoBlog pertenecía
-    Detalles TEXT NULL,                  -- Campo opcional para detalles adicionales, como el título del blog o un resumen del comentario.
+    ID_Usuario INT NOT NULL,            
+    Tipo_Accion VARCHAR(50) NOT NULL,    
+    Entidad_Afectada VARCHAR(50) NOT NULL, 
+    ID_Entidad_Afectada INT NULL,        
+    ID_TipoBlog_Afectado INT NULL,       
+    Detalles TEXT NULL,                  
     Fecha_Actividad DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (ID_Actividad),
     FOREIGN KEY (ID_Usuario) REFERENCES Usuarios(ID_Usuario),
@@ -145,7 +145,7 @@ BEGIN
 
     SELECT ID_TipoBlog, Titulo INTO v_ID_TipoBlog, v_Titulo_Blog
     FROM Blog
-    WHERE ID_Blog = OLD.ID_Blog; -- Usar OLD.ID_Blog para obtener el blog del comentario eliminado
+    WHERE ID_Blog = OLD.ID_Blog; 
 
     INSERT INTO Actividades (ID_Usuario, Tipo_Accion, Entidad_Afectada, ID_Entidad_Afectada, ID_TipoBlog_Afectado, Detalles)
     VALUES (OLD.ID_Usuario, 'ELIMINAR_COMENTARIO', 'COMENTARIO', OLD.ID_Comentario, v_ID_TipoBlog, CONCAT('Comentario eliminado del blog: "', IFNULL(v_Titulo_Blog, 'Título no disponible'), '" (Blog ID: ', OLD.ID_Blog, ')'));
@@ -169,7 +169,7 @@ DELIMITER ;
 
 -- TRIGGER PROMOVER USUARIO
 DELIMITER //
-DROP TRIGGER IF EXISTS after_promote_usuario_to_admin; -- Nombre más específico
+DROP TRIGGER IF EXISTS after_promote_usuario_to_admin; 
 CREATE TRIGGER after_promote_usuario_to_admin
 AFTER UPDATE ON Usuarios
 FOR EACH ROW
@@ -207,8 +207,8 @@ FOR EACH ROW
 BEGIN
     IF OLD.Admin_Request = TRUE AND NEW.Admin_Request = FALSE AND NEW.Es_Admin = FALSE THEN
         INSERT INTO Actividades (ID_Usuario, Tipo_Accion, Entidad_Afectada, ID_Entidad_Afectada, Detalles)
-        -- Aquí ID_Usuario podría ser el admin que denegó, si lo capturas en la app,
-        -- o el usuario cuya solicitud fue denegada.
+        
+       
         VALUES (NEW.ID_Usuario, 'DENEGAR_SOLICITUD_ADMIN', 'USUARIO', NEW.ID_Usuario, CONCAT('Solicitud de admin denegada para ', NEW.Nombre_Usuario, ' ', NEW.Apellido_Usuario));
     END IF;
 END;
